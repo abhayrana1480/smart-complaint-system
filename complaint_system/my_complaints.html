@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}My Complaints - Smart Complaint Management System{% endblock %}
+
+{% block content %}
+<div class="content">
+  <h1>📋 My Complaints</h1>
+  <p class="mb-4">Here is a full list of all complaints you have submitted.</p>
+
+  <div style="display: flex; gap: 0.75rem; margin-bottom: 1.5rem;">
+    <a href="{{ url_for('submit_complaint') }}" class="btn btn-primary">📝 Submit New Complaint</a>
+    <a href="{{ url_for('user_dashboard') }}" class="btn btn-secondary">🏠 Dashboard</a>
+  </div>
+
+  {% if complaints %}
+  <div style="overflow-x: auto;">
+    <table style="width: 100%; border-collapse: collapse;">
+      <thead>
+        <tr style="background: #f3f4f6;">
+          <th style="text-align: left; padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">ID</th>
+          <th style="text-align: left; padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Title</th>
+          <th style="text-align: left; padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Category</th>
+          <th style="text-align: left; padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Priority</th>
+          <th style="text-align: left; padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Sentiment</th>
+          <th style="text-align: left; padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Status</th>
+          <th style="text-align: left; padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Assigned To</th>
+          <th style="text-align: left; padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Created</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for complaint in complaints %}
+        <tr style="cursor: pointer;" onclick="window.location.href='{{ url_for('view_complaint', complaint_id=complaint.id) }}';">
+          <td style="padding: 0.75rem; border-bottom: 1px solid #f3f4f6;">#{{ complaint.id }}</td>
+          <td style="padding: 0.75rem; border-bottom: 1px solid #f3f4f6;">
+            <a href="{{ url_for('view_complaint', complaint_id=complaint.id) }}" style="color: #2563eb; text-decoration: none;">
+              {{ complaint.title }}
+            </a>
+          </td>
+          <td style="padding: 0.75rem; border-bottom: 1px solid #f3f4f6;">{{ complaint.category }}</td>
+          <td style="padding: 0.75rem; border-bottom: 1px solid #f3f4f6;">
+            <span class="priority-badge priority-{{ complaint.priority }}">{{ complaint.priority.replace('_', ' ').title() }}</span>
+          </td>
+          <td style="padding: 0.75rem; border-bottom: 1px solid #f3f4f6;">{{ complaint.sentiment.title() }}</td>
+          <td style="padding: 0.75rem; border-bottom: 1px solid #f3f4f6;">
+            <span class="status-badge status-{{ complaint.status }}">{{ complaint.status.replace('_', ' ').title() }}</span>
+          </td>
+          <td style="padding: 0.75rem; border-bottom: 1px solid #f3f4f6;">
+            {% if complaint.manager %}
+              {{ complaint.manager.username }}
+            {% else %}
+              -
+            {% endif %}
+          </td>
+          <td style="padding: 0.75rem; border-bottom: 1px solid #f3f4f6;">{{ complaint.created_at.strftime('%d %b %Y, %I:%M %p') }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="info-box">
+    No complaints found. Submit your first complaint using the button above.
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

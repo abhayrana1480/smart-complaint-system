@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Smart Complaint Management System{% endblock %}
+
+{% block content %}
+<div class="content">
+  <h1>👨‍💼 Admin Dashboard</h1>
+  <p class="mb-4">System overview with complaint analytics and latest activity.</p>
+
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+    <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 1rem;">
+      <p style="margin: 0; color: #1d4ed8; font-size: 0.9rem;">Total Complaints</p>
+      <h2 style="margin: 0.25rem 0 0 0; color: #1e3a8a;">{{ total_complaints }}</h2>
+    </div>
+    <div style="background: #fff7ed; border: 1px solid #fed7aa; border-radius: 8px; padding: 1rem;">
+      <p style="margin: 0; color: #c2410c; font-size: 0.9rem;">Open Complaints</p>
+      <h2 style="margin: 0.25rem 0 0 0; color: #9a3412;">{{ open_complaints }}</h2>
+    </div>
+    <div style="background: #ecfdf5; border: 1px solid #bbf7d0; border-radius: 8px; padding: 1rem;">
+      <p style="margin: 0; color: #15803d; font-size: 0.9rem;">Resolved Complaints</p>
+      <h2 style="margin: 0.25rem 0 0 0; color: #166534;">{{ resolved_complaints }}</h2>
+    </div>
+    <div style="background: #f5f3ff; border: 1px solid #ddd6fe; border-radius: 8px; padding: 1rem;">
+      <p style="margin: 0; color: #6d28d9; font-size: 0.9rem;">Avg Resolution (Days)</p>
+      <h2 style="margin: 0.25rem 0 0 0; color: #5b21b6;">{{ avg_resolution_days }}</h2>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
+    <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 1rem;">
+      <h3 style="margin-top: 0;">📊 Complaints per Category</h3>
+      <canvas id="categoryChart" height="220"></canvas>
+    </div>
+    <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 1rem;">
+      <h3 style="margin-top: 0;">🥧 Status Distribution</h3>
+      <canvas id="statusChart" height="220"></canvas>
+    </div>
+  </div>
+
+  <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 1rem;">
+    <h3 style="margin-top: 0;">🕒 Recent Activity</h3>
+    {% if recent_activity %}
+      <div style="display: flex; flex-direction: column; gap: 0.65rem;">
+        {% for item in recent_activity %}
+          <div style="padding: 0.75rem; border-radius: 6px; background: #f9fafb; border-left: 3px solid #2563eb;">
+            <p style="margin: 0; font-weight: 600;">{{ item.text }}</p>
+            <p style="margin: 0.15rem 0 0 0; color: #6b7280; font-size: 0.85rem;">{{ item.time.strftime('%d %b %Y, %I:%M %p') }}</p>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p style="margin: 0;">No recent activity found.</p>
+    {% endif %}
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const categoryLabels = {{ category_labels | tojson }};
+  const categoryCounts = {{ category_counts | tojson }};
+  const statusLabels = {{ status_labels | tojson }};
+  const statusCounts = {{ status_counts | tojson }};
+
+  const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+  new Chart(categoryCtx, {
+    type: 'bar',
+    data: {
+      labels: categoryLabels,
+      datasets: [{
+        label: 'Complaints',
+        data: categoryCounts,
+        backgroundColor: ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444']
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true } }
+    }
+  });
+
+  const statusCtx = document.getElementById('statusChart').getContext('2d');
+  new Chart(statusCtx, {
+    type: 'pie',
+    data: {
+      labels: statusLabels,
+      datasets: [{
+        data: statusCounts,
+        backgroundColor: ['#60a5fa', '#f59e0b', '#22c55e', '#9ca3af']
+      }]
+    },
+    options: { responsive: true }
+  });
+</script>
+{% endblock %}

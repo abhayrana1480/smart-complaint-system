@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Manager Dashboard - Smart Complaint Management System{% endblock %}
+
+{% block content %}
+<div class="content">
+  <h1>👔 Manager Queue</h1>
+  <p class="mb-4">Complaints assigned to you, sorted by priority.</p>
+
+  {% if complaints %}
+  <div style="overflow-x: auto;">
+    <table style="width: 100%; border-collapse: collapse;">
+      <thead>
+        <tr style="background: #f3f4f6;">
+          <th style="text-align: left; padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Title</th>
+          <th style="text-align: left; padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Category</th>
+          <th style="text-align: left; padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Priority</th>
+          <th style="text-align: left; padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Sentiment</th>
+          <th style="text-align: left; padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Status</th>
+          <th style="text-align: left; padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">SLA (Days)</th>
+          <th style="text-align: left; padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for complaint in complaints %}
+        <tr>
+          <td style="padding: 0.75rem; border-bottom: 1px solid #f3f4f6;">
+            <strong>#{{ complaint.id }}</strong> - {{ complaint.title }}
+          </td>
+          <td style="padding: 0.75rem; border-bottom: 1px solid #f3f4f6;">
+            <span class="status-badge status-open">{{ complaint.category }}</span>
+          </td>
+          <td style="padding: 0.75rem; border-bottom: 1px solid #f3f4f6;">
+            <span class="priority-badge priority-{{ complaint.priority }}">{{ complaint.priority.replace('_', ' ').title() }}</span>
+          </td>
+          <td style="padding: 0.75rem; border-bottom: 1px solid #f3f4f6;">
+            {% if complaint.sentiment == 'negative' %}
+              😡 Angry
+            {% elif complaint.sentiment == 'positive' %}
+              😊 Positive
+            {% else %}
+              😐 Neutral
+            {% endif %}
+          </td>
+          <td style="padding: 0.75rem; border-bottom: 1px solid #f3f4f6;">
+            <span class="status-badge status-{{ complaint.status }}">{{ complaint.status.replace('_', ' ').title() }}</span>
+          </td>
+          <td style="padding: 0.75rem; border-bottom: 1px solid #f3f4f6;">
+            {{ (now - complaint.created_at).days }}
+          </td>
+          <td style="padding: 0.75rem; border-bottom: 1px solid #f3f4f6;">
+            <a href="{{ url_for('manager_complaint', complaint_id=complaint.id) }}" class="btn btn-warning">
+              Resolve
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="info-box">
+    <strong>Great job!</strong> You have no complaints assigned right now.
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
