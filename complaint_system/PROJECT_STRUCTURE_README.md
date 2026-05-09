@@ -57,10 +57,6 @@ This file explains the purpose of every folder and file in this repository so th
 - `templates/admin/database.html` - implemented as the Complaint Control Center (displayed in the navbar as "🛡️ Control Center"); shows system-wide stats, recent complaints, and allows admins to reply, resolve, or delete complaints directly from the interface.
 - `templates/admin/assignments.html` - admin assignment manager page.
 
-## Miscellaneous Files
-
-- `user_dashboard_placeholder.txt` - placeholder text file that marks the user dashboard area or was used during development before the HTML dashboard was finalized.
-
 ## How The Files Fit Together
 
 1. `app.py` is the central controller and decides which template to render.
