@@ -31,20 +31,33 @@
 
       body {
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        background: linear-gradient(180deg, #f0f9ff 0%, #f8fafc 50%, #ecf0f5 100%);
+        background: linear-gradient(
+          180deg,
+          #f0f9ff 0%,
+          #f8fafc 50%,
+          #ecf0f5 100%
+        );
         color: var(--text-dark);
         line-height: 1.6;
       }
 
       /* ============= NAVBAR ============= */
       .navbar {
-        background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 35%, #1e40af 65%, #0ea5e9 100%);
+        background: linear-gradient(
+          135deg,
+          #0f172a 0%,
+          #1e3a8a 35%,
+          #1e40af 65%,
+          #0ea5e9 100%
+        );
         color: white;
         padding: 1rem 2.5rem;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        box-shadow: 0 20px 50px rgba(15, 23, 42, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        box-shadow:
+          0 20px 50px rgba(15, 23, 42, 0.35),
+          inset 0 1px 0 rgba(255, 255, 255, 0.15);
         position: sticky;
         top: 0;
         z-index: 100;
@@ -68,19 +81,31 @@
         width: 48px;
         height: 48px;
         border-radius: 14px;
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(56, 189, 248, 0.3));
+        background: linear-gradient(
+          135deg,
+          rgba(255, 255, 255, 0.2),
+          rgba(56, 189, 248, 0.3)
+        );
         border: 2px solid rgba(255, 255, 255, 0.3);
         display: grid;
         place-items: center;
         font-size: 1.4rem;
-        box-shadow: 0 8px 16px rgba(14, 165, 233, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.2);
+        box-shadow:
+          0 8px 16px rgba(14, 165, 233, 0.2),
+          inset 0 1px 2px rgba(255, 255, 255, 0.2);
         transition: all 0.3s ease;
       }
 
       .brand:hover .brand-logo {
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.25), rgba(56, 189, 248, 0.4));
+        background: linear-gradient(
+          135deg,
+          rgba(255, 255, 255, 0.25),
+          rgba(56, 189, 248, 0.4)
+        );
         border-color: rgba(255, 255, 255, 0.5);
-        box-shadow: 0 12px 24px rgba(14, 165, 233, 0.35), inset 0 1px 2px rgba(255, 255, 255, 0.3);
+        box-shadow:
+          0 12px 24px rgba(14, 165, 233, 0.35),
+          inset 0 1px 2px rgba(255, 255, 255, 0.3);
       }
 
       .brand-text h1 {
@@ -127,10 +152,14 @@
       }
 
       .navbar a::before {
-        content: '';
+        content: "";
         position: absolute;
         inset: 0;
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(56, 189, 248, 0.2));
+        background: linear-gradient(
+          135deg,
+          rgba(255, 255, 255, 0.15),
+          rgba(56, 189, 248, 0.2)
+        );
         opacity: 0;
         transition: opacity 0.25s ease;
         border-radius: 10px;
@@ -140,7 +169,9 @@
         background-color: rgba(14, 165, 233, 0.3);
         border-color: rgba(255, 255, 255, 0.5);
         transform: translateY(-3px);
-        box-shadow: 0 8px 20px rgba(14, 165, 233, 0.3), inset 0 1px 2px rgba(255, 255, 255, 0.1);
+        box-shadow:
+          0 8px 20px rgba(14, 165, 233, 0.3),
+          inset 0 1px 2px rgba(255, 255, 255, 0.1);
         color: #ffffff;
       }
 
@@ -155,7 +186,11 @@
         padding: 0.55rem 1rem;
         border-radius: 10px;
         border: 2px solid rgba(56, 189, 248, 0.5);
-        background: linear-gradient(135deg, rgba(14, 165, 233, 0.15), rgba(56, 189, 248, 0.1));
+        background: linear-gradient(
+          135deg,
+          rgba(14, 165, 233, 0.15),
+          rgba(56, 189, 248, 0.1)
+        );
         font-weight: 700;
         letter-spacing: 0.3px;
         box-shadow: 0 4px 12px rgba(14, 165, 233, 0.15);
@@ -318,7 +353,11 @@
       .btn {
         display: inline-block;
         padding: 0.78rem 1.35rem;
-        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        background: linear-gradient(
+          135deg,
+          var(--primary),
+          var(--primary-dark)
+        );
         color: white;
         border: none;
         border-radius: 9px;
@@ -351,7 +390,11 @@
       }
 
       .btn-primary {
-        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        background: linear-gradient(
+          135deg,
+          var(--primary),
+          var(--primary-dark)
+        );
       }
 
       .btn-success {
@@ -417,7 +460,9 @@
         border-radius: 14px;
         border: 1px solid rgba(148, 163, 184, 0.12);
         box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
-        transition: transform 0.25s ease, box-shadow 0.25s ease;
+        transition:
+          transform 0.25s ease,
+          box-shadow 0.25s ease;
       }
 
       .content:hover {
@@ -431,7 +476,9 @@
         border-radius: 12px;
         padding: 1.1rem;
         box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        transition:
+          transform 0.2s ease,
+          box-shadow 0.2s ease;
       }
 
       .card:hover {
@@ -627,8 +674,10 @@
         {% if current_user.role == 'admin' %}
         <a href="{{ url_for('admin_dashboard') }}">📊 Admin Dashboard</a>
         <a href="{{ url_for('admin_users') }}">👥 Users</a>
+        <a href="{{ url_for('admin_assignments') }}">Assignment Manager</a>
         {% elif current_user.role == 'manager' %}
         <a href="{{ url_for('manager_dashboard') }}">📋 Queue</a>
+        <a href="{{ url_for('manager_team') }}">Team Overview</a>
         {% else %}
         <a href="{{ url_for('user_dashboard') }}">🏠 My Dashboard</a>
         <a href="{{ url_for('submit_complaint') }}">📝 Submit</a>

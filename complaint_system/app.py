@@ -3,12 +3,12 @@ Smart Complaint Management System - Main Flask Application
 A simple, college-friendly complaint management system with AI classification and sentiment analysis
 """
 
-from flask import Flask, render_template, redirect, url_for, flash, request
+from flask import Flask, render_template, redirect, url_for, flash, request, jsonify
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from models import db, User, Complaint, Response
 from forms import LoginForm, RegisterForm, ComplaintForm, ResponseForm
 from ai_module import process_complaint_with_ai, get_chatbot_response
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 from sqlalchemy import case, inspect, text
 
@@ -418,7 +418,75 @@ def manager_dashboard():
         now=datetime.utcnow()
     )
 
+# ─── MANAGER TEAM OVERVIEW ROUTE ────────────────────────────────
 
+@app.route('/manager/team')
+@login_required
+def manager_team():
+    """
+    Manager team overview page.
+    Shows all complaints, workload stats, and a read-only team board.
+    """
+    if current_user.role != 'manager':
+        flash('❌ Unauthorized!', 'error')
+        return redirect(url_for('index'))
+
+    # Use aliases because Complaint has two links to User.
+    from sqlalchemy.orm import aliased
+    ManagerUser = aliased(User)
+    SubmitterUser = aliased(User)
+
+    # Load every complaint with both the assigned manager and the submitter.
+    all_rows = (
+        db.session.query(Complaint, ManagerUser, SubmitterUser)
+        .outerjoin(ManagerUser, Complaint.assigned_to == ManagerUser.id)
+        .join(SubmitterUser, Complaint.user_id == SubmitterUser.id)
+        .order_by(Complaint.created_at.desc())
+        .all()
+    )
+
+    # Show every manager in the team cards and workload summary.
+    all_managers = (
+        User.query.filter_by(role='manager')
+        .order_by(User.username.asc())
+        .all()
+    )
+
+    # Count recent resolution activity for each manager.
+    one_week_ago = datetime.utcnow() - timedelta(days=7)
+    workload_stats = []
+
+    for manager in all_managers:
+        total_assigned = Complaint.query.filter(
+            Complaint.assigned_to == manager.id
+        ).count()
+
+        open_count = Complaint.query.filter(
+            Complaint.assigned_to == manager.id,
+            Complaint.status.in_(['open', 'in_progress'])
+        ).count()
+
+        resolved_this_week = Complaint.query.filter(
+            Complaint.assigned_to == manager.id,
+            Complaint.status == 'resolved',
+            Complaint.resolved_at.isnot(None),
+            Complaint.resolved_at >= one_week_ago
+        ).count()
+
+        workload_stats.append({
+            'manager': manager,
+            'total_assigned': total_assigned,
+            'open_count': open_count,
+            'resolved_this_week': resolved_this_week,
+        })
+
+    return render_template(
+        'manager/team.html',
+        all_rows=all_rows,
+        all_managers=all_managers,
+        workload_stats=workload_stats,
+        current_user_id=current_user.id
+    )
 @app.route('/manager/complaint/<int:complaint_id>', methods=['GET', 'POST'])
 @login_required
 def manager_complaint(complaint_id):
@@ -467,7 +535,148 @@ def manager_complaint(complaint_id):
     return render_template('manager_complaint.html', complaint=complaint, form=form)
 
 
-# ─── ADMIN ROUTES (placeholder for now) ─────────────────────────
+# ─── ADMIN ASSIGNMENT MANAGER ROUTE ─────────────────────────────
+
+@app.route('/admin/assignments', methods=['GET', 'POST'])
+@login_required
+def admin_assignments():
+    """
+    Admin assignment manager page.
+    Handles complaint filtering, workload summaries, and reassignment.
+    """
+    if current_user.role != 'admin':
+        flash('❌ Unauthorized!', 'error')
+        return redirect(url_for('index'))
+
+    # Use aliases because Complaint has both assigned_to and user_id foreign keys.
+    from sqlalchemy.orm import aliased
+    ManagerUser = aliased(User)
+    SubmitterUser = aliased(User)
+
+    # Handle AJAX and normal form submissions for reassignment.
+    if request.method == 'POST':
+        complaint_id = request.form.get('complaint_id', '').strip()
+        new_manager_id = request.form.get('new_manager_id', '').strip()
+        is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+
+        # Validate the complaint id before looking it up.
+        try:
+            complaint_id_int = int(complaint_id)
+        except (TypeError, ValueError):
+            if is_ajax:
+                return jsonify({'success': False, 'error': 'Invalid complaint id.'}), 400
+            flash('❌ Invalid complaint id.', 'error')
+            return redirect(url_for('admin_assignments'))
+
+        complaint = Complaint.query.get(complaint_id_int)
+        if not complaint:
+            if is_ajax:
+                return jsonify({'success': False, 'error': 'Complaint not found.'}), 404
+            flash('❌ Complaint not found.', 'error')
+            return redirect(url_for('admin_assignments'))
+
+        # Empty manager id means unassign the complaint.
+        if new_manager_id == '':
+            complaint.assigned_to = None
+            manager_name = 'Unassigned'
+        else:
+            # Validate the selected manager before saving.
+            try:
+                manager_id_int = int(new_manager_id)
+            except (TypeError, ValueError):
+                if is_ajax:
+                    return jsonify({'success': False, 'error': 'Invalid manager selection.'}), 400
+                flash('❌ Invalid manager selection.', 'error')
+                return redirect(url_for('admin_assignments'))
+
+            manager = User.query.get(manager_id_int)
+            if not manager or manager.role != 'manager':
+                if is_ajax:
+                    return jsonify({'success': False, 'error': 'Selected user is not a manager.'}), 400
+                flash('❌ Selected user is not a manager.', 'error')
+                return redirect(url_for('admin_assignments'))
+
+            complaint.assigned_to = manager.id
+            manager_name = manager.username
+
+        db.session.commit()
+
+        if is_ajax:
+            return jsonify({'success': True, 'manager_name': manager_name})
+
+        flash('Complaint reassigned successfully', 'success')
+        return redirect(url_for('admin_assignments'))
+
+    # Read filters from the URL so the page can keep the current selection.
+    filter_manager = request.args.get('manager', 'all').strip()
+    filter_status = request.args.get('status', 'all').strip().lower()
+
+    rows_query = (
+        db.session.query(Complaint, ManagerUser, SubmitterUser)
+        .outerjoin(ManagerUser, Complaint.assigned_to == ManagerUser.id)
+        .join(SubmitterUser, Complaint.user_id == SubmitterUser.id)
+    )
+
+    # Apply the manager filter from the dropdown.
+    if filter_manager == 'unassigned':
+        rows_query = rows_query.filter(Complaint.assigned_to.is_(None))
+    elif filter_manager not in ('', 'all'):
+        try:
+            manager_id_int = int(filter_manager)
+            rows_query = rows_query.filter(Complaint.assigned_to == manager_id_int)
+        except ValueError:
+            pass
+
+    # Apply the status filter from the dropdown.
+    valid_statuses = {'open', 'in_progress', 'resolved', 'closed'}
+    if filter_status in valid_statuses:
+        rows_query = rows_query.filter(Complaint.status == filter_status)
+
+    rows = rows_query.order_by(Complaint.created_at.desc()).all()
+
+    # Load all managers for the dropdown and the workload summary.
+    all_managers = (
+        User.query.filter_by(role='manager')
+        .order_by(User.username.asc())
+        .all()
+    )
+
+    workload_summary = []
+    total_complaints = Complaint.query.count()
+    unassigned_count = Complaint.query.filter(Complaint.assigned_to.is_(None)).count()
+    active_managers_count = User.query.filter_by(role='manager', is_active_user=True).count()
+    resolved_complaints = Complaint.query.filter_by(status='resolved').count()
+
+    for manager in all_managers:
+        status_rows = (
+            db.session.query(Complaint.status, db.func.count(Complaint.id))
+            .filter(Complaint.assigned_to == manager.id)
+            .group_by(Complaint.status)
+            .all()
+        )
+
+        status_counts = {status: count for status, count in status_rows}
+
+        workload_summary.append({
+            'manager': manager,
+            'total_assigned': sum(status_counts.values()),
+            'open_count': status_counts.get('open', 0),
+            'in_progress_count': status_counts.get('in_progress', 0),
+            'resolved_count': status_counts.get('resolved', 0),
+        })
+
+    return render_template(
+        'admin/assignments.html',
+        rows=rows,
+        all_managers=all_managers,
+        workload_summary=workload_summary,
+        filter_manager=filter_manager,
+        filter_status=filter_status,
+        total_complaints=total_complaints,
+        unassigned_count=unassigned_count,
+        active_managers_count=active_managers_count,
+        resolved_complaints=resolved_complaints,
+    )# ─── ADMIN ROUTES (placeholder for now) ─────────────────────────
 
 @app.route('/admin/dashboard')
 @login_required

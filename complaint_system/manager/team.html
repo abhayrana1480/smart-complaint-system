@@ -1,0 +1,607 @@
+{% extends "base.html" %} {% block title %}Team Overview - Smart Complaint
+Management System{% endblock %} {% block content %}
+<style>
+  .team-page {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .team-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .team-title {
+    margin: 0;
+    font-size: 2rem;
+    color: #0f172a;
+  }
+
+  .team-subtitle {
+    margin: 0.35rem 0 0 0;
+    color: #475569;
+  }
+
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  .summary-card {
+    background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 1rem 1.1rem;
+    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.05);
+  }
+
+  .summary-label {
+    margin: 0;
+    color: #64748b;
+    font-size: 0.88rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .summary-value {
+    margin: 0.25rem 0 0 0;
+    font-size: 1.9rem;
+    font-weight: 800;
+    color: #0f172a;
+  }
+
+  .info-callout {
+    background: #dbeafe;
+    border: 1px solid #bfdbfe;
+    border-left: 5px solid #3b82f6;
+    color: #1e40af;
+    border-radius: 12px;
+    padding: 1rem 1.1rem;
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.08);
+  }
+
+  .info-callout strong {
+    display: block;
+    margin-bottom: 0.25rem;
+  }
+
+  .filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 1rem;
+    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.05);
+  }
+
+  .toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #cbd5e1;
+    background: #f8fafc;
+    color: #0f172a;
+    border-radius: 999px;
+    padding: 0.62rem 1rem;
+    font-size: 0.92rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .toggle-btn:hover {
+    transform: translateY(-1px);
+    border-color: #93c5fd;
+    box-shadow: 0 8px 16px rgba(15, 23, 42, 0.08);
+  }
+
+  .toggle-btn.active {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #ffffff;
+    border-color: transparent;
+    box-shadow: 0 8px 18px rgba(37, 99, 235, 0.2);
+  }
+
+  .table-wrap {
+    overflow-x: auto;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.05);
+  }
+
+  .team-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 1100px;
+  }
+
+  .team-table th,
+  .team-table td {
+    padding: 0.82rem 0.85rem;
+    border-bottom: 1px solid #edf2f7;
+    vertical-align: middle;
+    text-align: left;
+  }
+
+  .team-table thead tr {
+    background: linear-gradient(180deg, #f8fafc, #f1f5f9);
+  }
+
+  .team-table th {
+    font-size: 0.9rem;
+    color: #1f2937;
+    font-weight: 800;
+  }
+
+  .team-table tbody tr:hover {
+    background: #f8fbff;
+  }
+
+  .status-badge,
+  .priority-badge,
+  .category-badge,
+  .manager-chip,
+  .mine-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    font-size: 0.74rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    padding: 0.3rem 0.72rem;
+    border: 1px solid transparent;
+    white-space: nowrap;
+  }
+
+  .category-technical {
+    background: #dbeafe;
+    color: #1d4ed8;
+    border-color: #bfdbfe;
+  }
+
+  .category-billing {
+    background: #ffedd5;
+    color: #c2410c;
+    border-color: #fed7aa;
+  }
+
+  .category-service {
+    background: #dcfce7;
+    color: #15803d;
+    border-color: #bbf7d0;
+  }
+
+  .category-general {
+    background: #e5e7eb;
+    color: #374151;
+    border-color: #d1d5db;
+  }
+
+  .manager-chip.blue {
+    background: #dbeafe;
+    color: #1d4ed8;
+    border-color: #bfdbfe;
+  }
+
+  .manager-chip.green {
+    background: #dcfce7;
+    color: #15803d;
+    border-color: #bbf7d0;
+  }
+
+  .manager-chip.purple {
+    background: #ede9fe;
+    color: #7c3aed;
+    border-color: #ddd6fe;
+  }
+
+  .manager-chip.orange {
+    background: #ffedd5;
+    color: #c2410c;
+    border-color: #fed7aa;
+  }
+
+  .manager-chip.unassigned {
+    background: #e5e7eb;
+    color: #374151;
+    border-color: #d1d5db;
+  }
+
+  .mine-badge {
+    background: #dcfce7;
+    color: #15803d;
+    border-color: #bbf7d0;
+  }
+
+  .workload-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+  }
+
+  .workload-heading {
+    margin: 0;
+    font-size: 1.35rem;
+    color: #0f172a;
+  }
+
+  .workload-note {
+    margin: 0.25rem 0 0 0;
+    color: #475569;
+  }
+
+  .workload-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1rem;
+  }
+
+  .workload-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 1rem;
+    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.05);
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease,
+      border-color 0.2s ease;
+  }
+
+  .workload-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 16px 28px rgba(15, 23, 42, 0.08);
+  }
+
+  .workload-card.current-user {
+    border: 2px solid #1d4ed8;
+  }
+
+  .workload-card-top {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .avatar-circle {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    color: #fff;
+    font-weight: 900;
+    font-size: 1.15rem;
+    flex-shrink: 0;
+  }
+
+  .avatar-blue {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  }
+
+  .avatar-green {
+    background: linear-gradient(135deg, #22c55e, #15803d);
+  }
+
+  .avatar-purple {
+    background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+  }
+
+  .avatar-orange {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+  }
+
+  .manager-name {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #0f172a;
+  }
+
+  .manager-stats {
+    display: grid;
+    gap: 0.45rem;
+    color: #334155;
+    font-size: 0.92rem;
+  }
+
+  .progress-track {
+    margin-top: 0.9rem;
+    height: 10px;
+    background: #e2e8f0;
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: inherit;
+    transition: width 0.3s ease;
+  }
+
+  .progress-green {
+    background: linear-gradient(90deg, #22c55e, #16a34a);
+  }
+
+  .progress-orange {
+    background: linear-gradient(90deg, #f59e0b, #d97706);
+  }
+
+  .progress-red {
+    background: linear-gradient(90deg, #ef4444, #dc2626);
+  }
+
+  .empty-state {
+    padding: 1rem;
+    color: #475569;
+  }
+
+  @media (max-width: 1100px) {
+    .summary-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 720px) {
+    .summary-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .team-title {
+      font-size: 1.6rem;
+    }
+  }
+</style>
+
+<div class="team-page">
+  <!-- Page heading -->
+  <div class="team-header">
+    <div>
+      <h1 class="team-title">Team Overview</h1>
+      <p class="team-subtitle">
+        A read-only board for the full complaint system and every manager’s
+        workload.
+      </p>
+    </div>
+  </div>
+
+  <!-- Summary cards -->
+  <div class="summary-grid">
+    <div class="summary-card">
+      <p class="summary-label">All Complaints</p>
+      <h2 class="summary-value">{{ all_rows|length }}</h2>
+    </div>
+    <div class="summary-card">
+      <p class="summary-label">Open + In Progress</p>
+      <h2 class="summary-value">
+        {{ all_rows | selectattr('0.status', 'in', ['open', 'in_progress']) |
+        list | length }}
+      </h2>
+    </div>
+    <div class="summary-card">
+      <p class="summary-label">Active Managers</p>
+      <h2 class="summary-value">{{ all_managers|length }}</h2>
+    </div>
+    <div class="summary-card">
+      <p class="summary-label">Unassigned</p>
+      <h2 class="summary-value">
+        {{ all_rows | selectattr('0.assigned_to', 'equalto', none) | list |
+        length }}
+      </h2>
+    </div>
+  </div>
+
+  <!-- Read-only notice -->
+  <div class="info-callout">
+    <strong>This view is read-only.</strong>
+    To reassign complaints, contact the administrator.
+  </div>
+
+  <!-- Filter buttons -->
+  <div class="filter-bar" id="filterBar">
+    <button type="button" class="toggle-btn active" data-filter="all">
+      All
+    </button>
+    <button type="button" class="toggle-btn" data-filter="mine">
+      My Complaints
+    </button>
+    <button type="button" class="toggle-btn" data-filter="unassigned">
+      Unassigned
+    </button>
+    <button type="button" class="toggle-btn" data-filter="high">
+      High Priority
+    </button>
+  </div>
+
+  <!-- Team board -->
+  <div class="table-wrap">
+    <table class="team-table">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Category</th>
+          <th>Priority</th>
+          <th>Status</th>
+          <th>Assigned Manager</th>
+          <th>Mine?</th>
+          <th>Date Submitted</th>
+        </tr>
+      </thead>
+      <tbody id="teamTableBody">
+        {% if all_rows %} {% for complaint, manager_user, submitter in all_rows
+        %} {% set is_mine = complaint.assigned_to == current_user_id %}
+        <tr
+          data-mine="{{ 'true' if is_mine else 'false' }}"
+          data-assigned="{{ 'true' if complaint.assigned_to else 'false' }}"
+          data-priority="{{ complaint.priority }}">
+          <td>
+            {% if complaint.title|length > 45 %} {{ complaint.title[:45] }}...
+            {% else %} {{ complaint.title }} {% endif %}
+          </td>
+          <td>
+            {% if complaint.category == 'Technical' %}
+            <span class="category-badge category-technical">Technical</span>
+            {% elif complaint.category == 'Billing' %}
+            <span class="category-badge category-billing">Billing</span>
+            {% elif complaint.category == 'Service' %}
+            <span class="category-badge category-service">Service</span>
+            {% else %}
+            <span class="category-badge category-general">General</span>
+            {% endif %}
+          </td>
+          <td>
+            <span class="priority-badge priority-{{ complaint.priority }}"
+              >{{ complaint.priority.replace('_', ' ').title() }}</span
+            >
+          </td>
+          <td>
+            <span class="status-badge status-{{ complaint.status }}"
+              >{{ complaint.status.replace('_', ' ').title() }}</span
+            >
+          </td>
+          <td>
+            {% if manager_user %}
+            <span
+              class="manager-chip {% if manager_user.id % 4 == 0 %}blue{% elif manager_user.id % 4 == 1 %}green{% elif manager_user.id % 4 == 2 %}purple{% else %}orange{% endif %}">
+              {{ manager_user.username }}
+            </span>
+            {% else %}
+            <span class="manager-chip unassigned">Unassigned</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if complaint.assigned_to == current_user_id %}
+            <span class="mine-badge">✓ Mine</span>
+            {% endif %}
+          </td>
+          <td>{{ complaint.created_at.strftime('%d %b %Y') }}</td>
+        </tr>
+        {% endfor %} {% else %}
+        <tr>
+          <td colspan="7" class="empty-state">
+            No complaints found in the system.
+          </td>
+        </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Workload cards -->
+  <div class="workload-section">
+    <div>
+      <h2 class="workload-heading">Team Workload Cards</h2>
+      <p class="workload-note">
+        Each card shows how much work is sitting with each manager right now.
+      </p>
+    </div>
+
+    <div class="workload-grid">
+      {% for item in workload_stats %} {% set manager = item.manager %} {% set
+      ratio = 0 if item.total_assigned == 0 else ((item.open_count /
+      item.total_assigned) * 100) %} {% if ratio > 60 %} {% set progress_class =
+      'progress-red' %} {% elif ratio >= 30 %} {% set progress_class =
+      'progress-orange' %} {% else %} {% set progress_class = 'progress-green'
+      %} {% endif %}
+      <div
+        class="workload-card {% if manager.id == current_user_id %}current-user{% endif %}">
+        <div class="workload-card-top">
+          {% if manager.id % 4 == 0 %}
+          <div class="avatar-circle avatar-blue">
+            {{ manager.username[0] | upper }}
+          </div>
+          {% elif manager.id % 4 == 1 %}
+          <div class="avatar-circle avatar-green">
+            {{ manager.username[0] | upper }}
+          </div>
+          {% elif manager.id % 4 == 2 %}
+          <div class="avatar-circle avatar-purple">
+            {{ manager.username[0] | upper }}
+          </div>
+          {% else %}
+          <div class="avatar-circle avatar-orange">
+            {{ manager.username[0] | upper }}
+          </div>
+          {% endif %}
+          <div>
+            <p class="manager-name">{{ manager.username }}</p>
+            <span
+              class="manager-chip {% if manager.id % 4 == 0 %}blue{% elif manager.id % 4 == 1 %}green{% elif manager.id % 4 == 2 %}purple{% else %}orange{% endif %}">
+              Manager
+            </span>
+          </div>
+        </div>
+
+        <div class="manager-stats">
+          <div>Total assigned: <strong>{{ item.total_assigned }}</strong></div>
+          <div>Open / In Progress: <strong>{{ item.open_count }}</strong></div>
+          <div>
+            Resolved this week: <strong>{{ item.resolved_this_week }}</strong>
+          </div>
+        </div>
+
+        <div class="progress-track" aria-label="Open workload percentage">
+          <div
+            class="progress-fill {{ progress_class }}"
+            style="width: {{ ratio | round(0, 'floor') }}%;"></div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<script>
+  // Keep the buttons in sync with the row visibility state.
+  const filterButtons = document.querySelectorAll(".toggle-btn");
+  const rows = document.querySelectorAll("#teamTableBody tr[data-mine]");
+
+  function setActiveButton(activeButton) {
+    filterButtons.forEach(function (button) {
+      button.classList.toggle("active", button === activeButton);
+    });
+  }
+
+  // Show or hide rows using only data attributes.
+  function applyFilter(filterName) {
+    rows.forEach(function (row) {
+      const isMine = row.dataset.mine === "true";
+      const isAssigned = row.dataset.assigned === "true";
+      const isHigh = row.dataset.priority === "high";
+
+      let shouldShow = true;
+
+      if (filterName === "mine") {
+        shouldShow = isMine;
+      } else if (filterName === "unassigned") {
+        shouldShow = !isAssigned;
+      } else if (filterName === "high") {
+        shouldShow = isHigh;
+      }
+
+      row.style.display = shouldShow ? "" : "none";
+    });
+  }
+
+  // Wire up the four filter buttons.
+  filterButtons.forEach(function (button) {
+    button.addEventListener("click", function () {
+      const filterName = button.dataset.filter;
+      setActiveButton(button);
+      applyFilter(filterName);
+    });
+  });
+</script>
+{% endblock %}
