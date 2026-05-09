@@ -439,10 +439,10 @@
         <div style="display: flex; gap: 0.8rem; align-items: center;">
             <span style="color: #e0f2fe;">👤 {{ current_user.username }}</span>
             {% if current_user.role == 'admin' %}
-            <a href="{{ url_for('admin_dashboard') }}" style="color: #e0f2fe; text-decoration: none; padding: 0.65rem 1.2rem; border-radius: 10px; font-weight: 700;">📊 Dashboard</a>
-            <a href="{{ url_for('admin_users') }}" style="color: #e0f2fe; text-decoration: none; padding: 0.65rem 1.2rem; border-radius: 10px; font-weight: 700;">👥 Users</a>
-            <a href="{{ url_for('admin_database') }}" style="color: #e0f2fe; text-decoration: none; padding: 0.65rem 1.2rem; border-radius: 10px; font-weight: 700;">📊 Database</a>
-            <a href="{{ url_for('admin_assignments') }}" style="color: #e0f2fe; text-decoration: none; padding: 0.65rem 1.2rem; border-radius: 10px; font-weight: 700;">Assignment Manager</a>
+            <a href="{{ url_for('admin_dashboard') }}" class="{% if request.path.startswith(url_for('admin_dashboard')) %}active{% endif %}" style="color: #e0f2fe; text-decoration: none; padding: 0.65rem 1.2rem; border-radius: 10px; font-weight: 700;">📊 Dashboard</a>
+            <a href="{{ url_for('admin_users') }}" class="{% if request.path.startswith(url_for('admin_users')) %}active{% endif %}" style="color: #e0f2fe; text-decoration: none; padding: 0.65rem 1.2rem; border-radius: 10px; font-weight: 700;">👥 Users</a>
+            <a href="{{ url_for('admin_database') }}" class="{% if request.path.startswith(url_for('admin_database')) %}active{% endif %}" style="color: #e0f2fe; text-decoration: none; padding: 0.65rem 1.2rem; border-radius: 10px; font-weight: 700;">🛡️ Control Center</a>
+            <a href="{{ url_for('admin_assignments') }}" class="{% if request.path.startswith(url_for('admin_assignments')) %}active{% endif %}" style="color: #e0f2fe; text-decoration: none; padding: 0.65rem 1.2rem; border-radius: 10px; font-weight: 700;">Assignment Manager</a>
             {% endif %}
             <a href="{{ url_for('logout') }}" style="color: #e0f2fe; text-decoration: none; padding: 0.65rem 1.2rem; border-radius: 10px; font-weight: 700;">🚪 Logout</a>
         </div>

@@ -954,7 +954,7 @@ def admin_user_detail(user_id):
 @login_required
 def admin_database():
     """
-    Admin database overview page showing system-wide statistics.
+    Admin control center showing system-wide statistics and direct complaint actions.
     Displays counts of users, complaints, responses, and recent activity.
     """
     if current_user.role != 'admin':
@@ -996,6 +996,68 @@ def admin_database():
         total_responses=total_responses,
         recent_complaints=recent_complaints
     )
+
+
+@app.route('/admin/database/complaint/<int:complaint_id>/action', methods=['POST'])
+@login_required
+def admin_database_complaint_action(complaint_id):
+    """
+    Allow admins to reply to, resolve, or delete a complaint directly from the database dashboard.
+    """
+    if current_user.role != 'admin':
+        flash('❌ Unauthorized!', 'error')
+        return redirect(url_for('index'))
+
+    complaint = Complaint.query.get_or_404(complaint_id)
+    action = request.form.get('action', '').strip().lower()
+    message = request.form.get('message', '').strip()
+
+    if action == 'delete':
+        complaint_title = complaint.title
+        db.session.delete(complaint)
+        db.session.commit()
+        flash(f'✅ Complaint "{complaint_title}" has been permanently deleted.', 'success')
+        return redirect(url_for('admin_database'))
+
+    if action not in {'reply', 'resolve'}:
+        flash('❌ Invalid complaint action.', 'error')
+        return redirect(url_for('admin_database'))
+
+    if action == 'reply' and not message:
+        flash('❌ Please enter a reply before sending.', 'error')
+        return redirect(url_for('admin_database'))
+
+    if action == 'resolve' and not message:
+        message = f'Complaint #{complaint.id} resolved directly from the admin control center.'
+
+    if complaint.assigned_to is None and action == 'reply':
+        complaint.status = 'in_progress'
+    elif action == 'reply' and complaint.status == 'open':
+        complaint.status = 'in_progress'
+
+    if action == 'resolve':
+        complaint.status = 'resolved'
+        if complaint.resolved_at is None:
+            complaint.resolved_at = datetime.utcnow()
+    elif complaint.status == 'resolved' and action == 'reply':
+        complaint.status = 'in_progress'
+        complaint.resolved_at = None
+
+    response = Response(
+        complaint_id=complaint.id,
+        author_id=current_user.id,
+        message=message,
+    )
+
+    db.session.add(response)
+    db.session.commit()
+
+    if action == 'resolve':
+        flash(f'✅ Complaint #{complaint.id} has been resolved.', 'success')
+    else:
+        flash(f'✅ Reply saved for complaint #{complaint.id}.', 'success')
+
+    return redirect(url_for('admin_database'))
 
 
 @app.route('/admin/users/create-manager', methods=['POST'])

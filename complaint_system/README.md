@@ -41,7 +41,7 @@ Important files:
 - `templates/manager/complaint.html` - manager complaint detail page
 - `templates/admin/dashboard.html` - admin landing page
 - `templates/admin/users.html` - admin user management page
-- `templates/admin/database.html` - admin database overview page
+- `templates/admin/database.html` - admin control center with direct complaint reply, resolve, and delete actions
 - `templates/admin/assignments.html` - admin assignment manager page
 - `templates/error.html` - error display page
 

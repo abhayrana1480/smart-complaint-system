@@ -65,6 +65,24 @@
         backdrop-filter: blur(8px);
       }
 
+        /* Active link styling */
+        .navbar-links a.active {
+          background: rgba(255, 255, 255, 0.08);
+          padding: 0.55rem 1rem;
+          border-radius: 8px;
+          box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
+          transform: translateY(-1px);
+        }
+
+        /* Ensure profile text does not get link/glow styling */
+        .user-info {
+          color: #e0f2fe;
+          font-weight: 700;
+          padding: 0.25rem 0.5rem;
+          border-radius: 6px;
+          box-shadow: none;
+        }
+
       .brand {
         display: flex;
         align-items: center;
@@ -672,17 +690,17 @@
           }})</span
         >
         {% if current_user.role == 'admin' %}
-        <a href="{{ url_for('admin_dashboard') }}">📊 Admin Dashboard</a>
-        <a href="{{ url_for('admin_users') }}">👥 Users</a>
-        <a href="{{ url_for('admin_database') }}">📊 Database</a>
-        <a href="{{ url_for('admin_assignments') }}">Assignment Manager</a>
+          <a href="{{ url_for('admin_dashboard') }}" class="{% if request.path.startswith(url_for('admin_dashboard')) %}active{% endif %}">📊 Admin Dashboard</a>
+          <a href="{{ url_for('admin_users') }}" class="{% if request.path.startswith(url_for('admin_users')) %}active{% endif %}">👥 Users</a>
+          <a href="{{ url_for('admin_database') }}" class="{% if request.path.startswith(url_for('admin_database')) %}active{% endif %}">🛡️ Control Center</a>
+          <a href="{{ url_for('admin_assignments') }}" class="{% if request.path.startswith(url_for('admin_assignments')) %}active{% endif %}">Assignment Manager</a>
         {% elif current_user.role == 'manager' %}
-        <a href="{{ url_for('manager_dashboard') }}">📋 Queue</a>
-        <a href="{{ url_for('manager_team') }}">Team Overview</a>
+        <a href="{{ url_for('manager_dashboard') }}" class="{% if request.path.startswith(url_for('manager_dashboard')) %}active{% endif %}">📋 Queue</a>
+        <a href="{{ url_for('manager_team') }}" class="{% if request.path.startswith(url_for('manager_team')) %}active{% endif %}">Team Overview</a>
         {% else %}
-        <a href="{{ url_for('user_dashboard') }}">🏠 My Dashboard</a>
-        <a href="{{ url_for('submit_complaint') }}">📝 Submit</a>
-        <a href="{{ url_for('my_complaints') }}">📋 My Complaints</a>
+          <a href="{{ url_for('user_dashboard') }}" class="{% if request.path.startswith(url_for('user_dashboard')) %}active{% endif %}">🏠 My Dashboard</a>
+          <a href="{{ url_for('submit_complaint') }}" class="{% if request.path.startswith(url_for('submit_complaint')) %}active{% endif %}">📝 Submit</a>
+          <a href="{{ url_for('my_complaints') }}" class="{% if request.path.startswith(url_for('my_complaints')) %}active{% endif %}">📋 My Complaints</a>
         {% endif %}
         <a href="{{ url_for('logout') }}">🚪 Logout</a>
       </div>

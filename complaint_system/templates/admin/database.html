@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Database Overview - Admin</title>
+    <title>Complaint Control Center - Admin</title>
     <style>
       * {
         margin: 0;
@@ -193,6 +193,103 @@
         color: #1e40af;
       }
 
+      .action-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        min-width: 240px;
+      }
+
+      .action-details {
+        background: #f8fafc;
+        border: 1px solid #cbd5e1;
+        border-radius: 12px;
+        padding: 0.75rem 0.85rem;
+      }
+
+      .action-details summary {
+        cursor: pointer;
+        list-style: none;
+        font-weight: 800;
+        color: #1e3a8a;
+      }
+
+      .action-details summary::-webkit-details-marker {
+        display: none;
+      }
+
+      .action-hint {
+        margin-top: 0.35rem;
+        font-size: 0.82rem;
+        color: #64748b;
+      }
+
+      .action-form {
+        margin-top: 0.75rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+      }
+
+      .action-label {
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #64748b;
+        font-weight: 800;
+      }
+
+      .action-textarea {
+        width: 100%;
+        min-height: 90px;
+        resize: vertical;
+        border: 1px solid #cbd5e1;
+        border-radius: 10px;
+        padding: 0.75rem;
+        font: inherit;
+        color: #0f172a;
+        background: #ffffff;
+      }
+
+      .action-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+
+      .action-btn {
+        border: none;
+        border-radius: 10px;
+        padding: 0.6rem 0.85rem;
+        font-weight: 800;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .action-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
+      }
+
+      .action-btn-reply {
+        background: #dbeafe;
+        color: #1e40af;
+      }
+
+      .action-btn-resolve {
+        background: #d1f3d1;
+        color: #166534;
+      }
+
+      .action-btn-delete {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+
+      .delete-form {
+        margin: 0;
+      }
+
       .truncate {
         max-width: 300px;
         white-space: nowrap;
@@ -273,7 +370,7 @@
             place-items: center;
             font-size: 1.4rem;
           ">
-          📊
+          🛡️
         </div>
         <div>
           <h1
@@ -283,7 +380,7 @@
               margin: 0;
               color: white;
             ">
-            Database Overview
+            Complaint Control Center
           </h1>
           <small
             style="
@@ -292,18 +389,16 @@
               opacity: 0.92;
               color: #38bdf8;
             "
-            >Live System Stats</small
+            >Direct complaint operations</small
           >
         </div>
       </div>
       <div style="display: flex; gap: 0.8rem; align-items: center">
-        <span style="color: #e0f2fe"
-          >👤 {{ current_user.username }} ({{ current_user.role.title()
-          }})</span
+        <span class="user-info">👤 {{ current_user.username }} ({{ current_user.role.title() }})</span>
         >
         {% if current_user.role == 'admin' %}
         <a
-          href="{{ url_for('admin_dashboard') }}"
+          href="{{ url_for('admin_dashboard') }}" class="{% if request.path.startswith(url_for('admin_dashboard')) %}active{% endif %}"
           style="
             color: #e0f2fe;
             text-decoration: none;
@@ -315,7 +410,7 @@
           >📊 Dashboard</a
         >
         <a
-          href="{{ url_for('admin_users') }}"
+          href="{{ url_for('admin_users') }}" class="{% if request.path.startswith(url_for('admin_users')) %}active{% endif %}"
           style="
             color: #e0f2fe;
             text-decoration: none;
@@ -327,7 +422,7 @@
           >👥 Users</a
         >
         <a
-          href="{{ url_for('admin_database') }}"
+          href="{{ url_for('admin_database') }}" class="{% if request.path.startswith(url_for('admin_database')) %}active{% endif %}"
           style="
             color: #e0f2fe;
             text-decoration: none;
@@ -336,10 +431,10 @@
             font-weight: 700;
             font-size: 0.95rem;
           "
-          >📊 Database</a
+          >🛡️ Control Center</a
         >
         <a
-          href="{{ url_for('admin_assignments') }}"
+          href="{{ url_for('admin_assignments') }}" class="{% if request.path.startswith(url_for('admin_assignments')) %}active{% endif %}"
           style="
             color: #e0f2fe;
             text-decoration: none;
@@ -383,10 +478,10 @@
 
       <!-- PAGE HEADER -->
       <div class="page-header">
-        <h1>Database Overview</h1>
+        <h1>Complaint Control Center</h1>
         <p>Live summary of all data stored in complaints.db</p>
         <p class="page-note">
-          📊 Data refreshes every time you reload this page.
+          🛡️ Use the actions below to reply, resolve, or delete complaints directly.
         </p>
       </div>
 
@@ -474,6 +569,7 @@
                 <th>Status</th>
                 <th>Submitted By</th>
                 <th>Date</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -503,6 +599,63 @@
                   >
                 </td>
                 <td>{{ complaint.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td>
+                  <div class="action-stack">
+                    <details class="action-details">
+                      <summary>Reply / Resolve</summary>
+                      <div class="action-hint">
+                        Sends an admin response and optionally updates the complaint state.
+                      </div>
+                      <form
+                        method="POST"
+                        action="{{ url_for('admin_database_complaint_action', complaint_id=complaint.id) }}"
+                        class="action-form"
+                      >
+                        <label class="action-label" for="message-{{ complaint.id }}">Message</label>
+                        <textarea
+                          id="message-{{ complaint.id }}"
+                          name="message"
+                          class="action-textarea"
+                          placeholder="Write the reply or resolution note"
+                        >{% if complaint.ai_response %}{{ complaint.ai_response }}{% endif %}</textarea>
+                        <div class="action-buttons">
+                          <button
+                            type="submit"
+                            name="action"
+                            value="reply"
+                            class="action-btn action-btn-reply"
+                          >
+                            Reply
+                          </button>
+                          <button
+                            type="submit"
+                            name="action"
+                            value="resolve"
+                            class="action-btn action-btn-resolve"
+                          >
+                            Resolve
+                          </button>
+                        </div>
+                      </form>
+                    </details>
+
+                    <form
+                      method="POST"
+                      action="{{ url_for('admin_database_complaint_action', complaint_id=complaint.id) }}"
+                      class="delete-form"
+                      onsubmit="return confirm('Delete this complaint permanently? This cannot be undone.');"
+                    >
+                      <button
+                        type="submit"
+                        name="action"
+                        value="delete"
+                        class="action-btn action-btn-delete"
+                      >
+                        Delete
+                      </button>
+                    </form>
+                  </div>
+                </td>
               </tr>
               {% endfor %}
             </tbody>

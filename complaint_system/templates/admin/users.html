@@ -487,13 +487,11 @@
         </div>
       </div>
       <div style="display: flex; gap: 0.8rem; align-items: center">
-        <span style="color: #e0f2fe"
-          >👤 {{ current_user.username }} ({{ current_user.role.title()
-          }})</span
+        <span class="user-info">👤 {{ current_user.username }} ({{ current_user.role.title() }})</span>
         >
         {% if current_user.role == 'admin' %}
         <a
-          href="{{ url_for('admin_dashboard') }}"
+          href="{{ url_for('admin_dashboard') }}" class="{% if request.path.startswith(url_for('admin_dashboard')) %}active{% endif %}"
           style="
             color: #e0f2fe;
             text-decoration: none;
@@ -506,7 +504,7 @@
           >📊 Dashboard</a
         >
         <a
-          href="{{ url_for('admin_users') }}"
+          href="{{ url_for('admin_users') }}" class="{% if request.path.startswith(url_for('admin_users')) %}active{% endif %}"
           style="
             color: #e0f2fe;
             text-decoration: none;
@@ -519,7 +517,7 @@
           >👥 Users</a
         >
         <a
-          href="{{ url_for('admin_database') }}"
+          href="{{ url_for('admin_database') }}" class="{% if request.path.startswith(url_for('admin_database')) %}active{% endif %}"
           style="
             color: #e0f2fe;
             text-decoration: none;
@@ -529,10 +527,10 @@
             font-weight: 700;
             font-size: 0.95rem;
           "
-          >📊 Database</a
+          >🛡️ Control Center</a
         >
         <a
-          href="{{ url_for('admin_assignments') }}"
+          href="{{ url_for('admin_assignments') }}" class="{% if request.path.startswith(url_for('admin_assignments')) %}active{% endif %}"
           style="
             color: #e0f2fe;
             text-decoration: none;
