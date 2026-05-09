@@ -12,8 +12,8 @@ from datetime import datetime, timedelta
 import os
 from sqlalchemy import case, inspect, text
 
-# Initialize Flask app with templates folder in current directory
-app = Flask(__name__, template_folder='.')
+# Initialize Flask app with a dedicated templates folder
+app = Flask(__name__, template_folder='templates')
 
 # ─── CONFIGURATION ───────────────────────────────────────────────
 # Secret key for session management (change this in production!)
@@ -59,11 +59,17 @@ def migrate_db_schema():
     user_columns = {column['name'] for column in inspector.get_columns('users')}
     complaint_columns = {column['name'] for column in inspector.get_columns('complaints')}
 
-    if 'is_active_user' not in user_columns:
+    # Handle the rename from is_active_user to is_active
+    if 'is_active_user' in user_columns and 'is_active' not in user_columns:
         with db.engine.begin() as connection:
-            connection.execute(text('ALTER TABLE users ADD COLUMN is_active_user BOOLEAN DEFAULT 1'))
-            connection.execute(text('UPDATE users SET is_active_user = 1 WHERE is_active_user IS NULL'))
-        print("✅ Added missing column: users.is_active_user")
+            connection.execute(text('ALTER TABLE users RENAME COLUMN is_active_user TO is_active'))
+        print("✅ Renamed column: users.is_active_user → users.is_active")
+    elif 'is_active' not in user_columns:
+        # For fresh databases, just add the is_active column
+        with db.engine.begin() as connection:
+            connection.execute(text('ALTER TABLE users ADD COLUMN is_active BOOLEAN DEFAULT 1'))
+            connection.execute(text('UPDATE users SET is_active = 1 WHERE is_active IS NULL'))
+        print("✅ Added missing column: users.is_active")
 
     if 'internal_notes' not in complaint_columns:
         with db.engine.begin() as connection:
@@ -136,8 +142,9 @@ def assign_manager_to_complaint():
     """
     Pick a manager for a new complaint.
     For simplicity, this assigns the manager with the least currently open/in-progress complaints.
+    Only assigns to active managers (is_active == True).
     """
-    managers = User.query.filter_by(role='manager', is_active_user=True).all()
+    managers = User.query.filter_by(role='manager', is_active=True).all()
     if not managers:
         return None
 
@@ -193,14 +200,15 @@ def register():
         return redirect(url_for('login'))
     
     # If form has errors, they're automatically shown in the template
-    return render_template('register.html', form=form)
+    return render_template('auth/register.html', form=form)
 
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     """
     Login page with form validation and CSRF protection
-    Uses Flask-WTF to validate email/password before authenticating
+    Uses Flask-WTF to validate email/password before authenticating.
+    Also checks if the user account is deactivated (is_active == False).
     """
     if current_user.is_authenticated:
         return redirect(url_for('index'))
@@ -214,9 +222,11 @@ def login():
         
         # Verify user exists and password is correct
         if user and user.check_password(form.password.data):
-            if not user.is_active_user:
-                flash('❌ Your account is deactivated. Please contact admin.', 'error')
+            # Check if user account is deactivated (is_active == False)
+            if not user.is_active:
+                flash('❌ Your account has been temporarily deactivated. Please contact the administrator.', 'error')
                 return redirect(url_for('login'))
+            
             login_user(user, remember=True)  # remember=True keeps user logged in
             
             # Redirect based on role
@@ -232,7 +242,7 @@ def login():
         else:
             flash('❌ Invalid email or password. Please try again.', 'error')
     
-    return render_template('login.html', form=form)
+    return render_template('auth/login.html', form=form)
 
 
 @app.route('/logout')
@@ -268,7 +278,7 @@ def user_dashboard():
     ).limit(5).all()
 
     return render_template(
-        'user_dashboard.html',
+        'user/dashboard.html',
         open_count=open_count,
         in_progress_count=in_progress_count,
         resolved_count=resolved_count,
@@ -318,7 +328,7 @@ def submit_complaint():
         )
         return redirect(url_for('my_complaints'))
 
-    return render_template('user_submit.html', form=form)
+    return render_template('user/submit.html', form=form)
 
 
 @app.route('/user/complaints')
@@ -336,7 +346,7 @@ def my_complaints():
         Complaint.created_at.desc()
     ).all()
 
-    return render_template('my_complaints.html', complaints=complaints)
+    return render_template('user/my_complaints.html', complaints=complaints)
 
 
 @app.route('/user/complaint/<int:complaint_id>')
@@ -353,7 +363,7 @@ def view_complaint(complaint_id):
         flash('❌ Unauthorized!', 'error')
         return redirect(url_for('my_complaints'))
     
-    return render_template('complaint_detail.html', complaint=complaint)
+    return render_template('user/complaint_detail.html', complaint=complaint)
 
 
 @app.route('/user/complaint/<int:complaint_id>/rate', methods=['POST'])
@@ -413,7 +423,7 @@ def manager_dashboard():
     ).all()
 
     return render_template(
-        'manager_dashboard.html',
+        'manager/dashboard.html',
         complaints=assigned_complaints,
         now=datetime.utcnow()
     )
@@ -532,7 +542,7 @@ def manager_complaint(complaint_id):
         flash('✅ Complaint update saved successfully.', 'success')
         return redirect(url_for('manager_complaint', complaint_id=complaint.id))
 
-    return render_template('manager_complaint.html', complaint=complaint, form=form)
+    return render_template('manager/complaint.html', complaint=complaint, form=form)
 
 
 # ─── ADMIN ASSIGNMENT MANAGER ROUTE ─────────────────────────────
@@ -644,7 +654,7 @@ def admin_assignments():
     workload_summary = []
     total_complaints = Complaint.query.count()
     unassigned_count = Complaint.query.filter(Complaint.assigned_to.is_(None)).count()
-    active_managers_count = User.query.filter_by(role='manager', is_active_user=True).count()
+    active_managers_count = User.query.filter_by(role='manager', is_active=True).count()
     resolved_complaints = Complaint.query.filter_by(status='resolved').count()
 
     for manager in all_managers:
@@ -726,13 +736,13 @@ def admin_dashboard():
     for response in recent_responses:
         recent_activity.append({
             'time': response.created_at,
-            'text': f"{response.author.username} replied on Complaint #{response.complaint_id}"
+            'text': f"{response.response_author.username} replied on Complaint #{response.complaint_id}"
         })
 
     recent_activity = sorted(recent_activity, key=lambda item: item['time'], reverse=True)[:10]
 
     return render_template(
-        'admin_dashboard.html',
+        'admin/dashboard.html',
         total_complaints=total_complaints,
         open_complaints=open_complaints,
         resolved_complaints=resolved_complaints,
@@ -744,19 +754,248 @@ def admin_dashboard():
         recent_activity=recent_activity
     )
 
+# ─── ENHANCED ADMIN ROUTES ──────────────────────────────────────
 
+## B1. ENHANCED USER LIST - Replace existing /admin/users route
 @app.route('/admin/users')
 @login_required
 def admin_users():
     """
-    Admin user management page: view users, update role, deactivate user.
+    Admin user management page: view all users (active and inactive).
+    Shows user stats, activity, and action buttons for deactivate/reactivate/delete.
+    Separates active and inactive users into two tables.
     """
     if current_user.role != 'admin':
         flash('❌ Unauthorized!', 'error')
         return redirect(url_for('index'))
 
-    users = User.query.order_by(User.created_at.desc()).all()
-    return render_template('admin_users.html', users=users)
+    # Query active and inactive users
+    active_users = User.query.filter_by(is_active=True).order_by(User.created_at.desc()).all()
+    inactive_users = User.query.filter_by(is_active=False).order_by(User.created_at.desc()).all()
+
+    # Build dictionaries for complaint counts and last activity dates
+    complaint_counts = {}
+    last_active = {}
+
+    for user in active_users + inactive_users:
+        # Count complaints submitted by this user
+        complaint_counts[user.id] = Complaint.query.filter_by(user_id=user.id).count()
+        
+        # Get their last activity (most recent complaint)
+        last_complaint = Complaint.query.filter_by(user_id=user.id).order_by(Complaint.created_at.desc()).first()
+        if last_complaint:
+            last_active[user.id] = last_complaint.created_at.strftime('%Y-%m-%d %H:%M')
+        else:
+            last_active[user.id] = 'No activity'
+
+    return render_template(
+        'admin/users.html',
+        active_users=active_users,
+        inactive_users=inactive_users,
+        complaint_counts=complaint_counts,
+        last_active=last_active
+    )
+
+
+## B2. DEACTIVATE USER - Temporarily disable login
+@app.route('/admin/deactivate/<int:user_id>', methods=['POST'])
+@login_required
+def deactivate_user(user_id):
+    """
+    Deactivate a user account (temporarily disable login, keep data).
+    Safety checks: Cannot deactivate admin accounts or self.
+    """
+    if current_user.role != 'admin':
+        flash('❌ Unauthorized!', 'error')
+        return redirect(url_for('index'))
+
+    # Find user - if not found, flash error and redirect
+    user = User.query.get(user_id)
+    if not user:
+        flash('❌ User not found.', 'error')
+        return redirect(url_for('admin_users'))
+
+    # Safety check: cannot deactivate admin accounts
+    if user.role == 'admin':
+        flash('❌ Cannot deactivate an admin account.', 'error')
+        return redirect(url_for('admin_users'))
+
+    # Check if already deactivated
+    if not user.is_active:
+        flash(f'❌ User {user.username} is already deactivated.', 'error')
+        return redirect(url_for('admin_users'))
+
+    # Deactivate the user
+    user.is_active = False
+    db.session.commit()
+    
+    flash(f'✅ User {user.username} has been temporarily deactivated.', 'success')
+    return redirect(url_for('admin_users'))
+
+
+## B3. REACTIVATE USER - Re-enable login
+@app.route('/admin/reactivate/<int:user_id>', methods=['POST'])
+@login_required
+def reactivate_user(user_id):
+    """
+    Reactivate a deactivated user account (re-enable login).
+    """
+    if current_user.role != 'admin':
+        flash('❌ Unauthorized!', 'error')
+        return redirect(url_for('index'))
+
+    # Find user - if not found, flash error and redirect
+    user = User.query.get(user_id)
+    if not user:
+        flash('❌ User not found.', 'error')
+        return redirect(url_for('admin_users'))
+
+    # Check if already active
+    if user.is_active:
+        flash(f'❌ User {user.username} is already active.', 'error')
+        return redirect(url_for('admin_users'))
+
+    # Reactivate the user
+    user.is_active = True
+    db.session.commit()
+    
+    flash(f'✅ User {user.username} has been reactivated successfully.', 'success')
+    return redirect(url_for('admin_users'))
+
+
+## B4. PERMANENT DELETE USER - Delete user and all their data
+@app.route('/admin/delete_user/<int:user_id>', methods=['POST'])
+@login_required
+def delete_user(user_id):
+    """
+    Permanently delete a user and all their submitted complaints and responses.
+    Safety checks: Cannot delete admin accounts, cannot delete self.
+    Unassigns any complaints that were assigned to this user (as a manager).
+    """
+    if current_user.role != 'admin':
+        flash('❌ Unauthorized!', 'error')
+        return redirect(url_for('index'))
+
+    # Find user - if not found, flash error and redirect
+    user = User.query.get(user_id)
+    if not user:
+        flash('❌ User not found.', 'error')
+        return redirect(url_for('admin_users'))
+
+    # Safety check: cannot delete admin accounts
+    if user.role == 'admin':
+        flash('❌ Cannot delete an admin account.', 'error')
+        return redirect(url_for('admin_users'))
+
+    # Safety check: cannot delete self
+    if user.id == current_user.id:
+        flash('❌ You cannot delete your own account.', 'error')
+        return redirect(url_for('admin_users'))
+
+    # Before deleting the user, unassign any complaints they were managing
+    complaints_assigned = Complaint.query.filter_by(assigned_to=user.id).all()
+    for complaint in complaints_assigned:
+        complaint.assigned_to = None
+    db.session.commit()
+
+    # Now delete the user (cascade will delete their submitted complaints and responses)
+    username = user.username
+    db.session.delete(user)
+    db.session.commit()
+
+    flash(f'✅ User {username} and all their data have been permanently deleted.', 'success')
+    return redirect(url_for('admin_users'))
+
+
+## B5. VIEW USER DETAIL - Show full user profile and complaints
+@app.route('/admin/user/<int:user_id>')
+@login_required
+def admin_user_detail(user_id):
+    """
+    Admin view of a single user's profile and complaint history.
+    Shows user stats, all their submitted complaints, and all their responses.
+    """
+    if current_user.role != 'admin':
+        flash('❌ Unauthorized!', 'error')
+        return redirect(url_for('index'))
+
+    # Find user - if not found, return 404
+    user = User.query.get_or_404(user_id)
+
+    # Get all complaints submitted by this user
+    complaints = Complaint.query.filter_by(user_id=user.id).order_by(Complaint.created_at.desc()).all()
+
+    # Get all responses written by this user
+    responses = Response.query.filter_by(author_id=user.id).order_by(Response.created_at.desc()).all()
+
+    # Calculate stats
+    total_complaints = len(complaints)
+    open_count = sum(1 for c in complaints if c.status == 'open')
+    resolved_count = sum(1 for c in complaints if c.status == 'resolved')
+    
+    # Calculate average rating (only for complaints with ratings)
+    ratings = [c.rating for c in complaints if c.rating is not None]
+    avg_rating = round(sum(ratings) / len(ratings), 1) if ratings else None
+
+    return render_template(
+        'admin/user_detail.html',
+        user=user,
+        complaints=complaints,
+        responses=responses,
+        total_complaints=total_complaints,
+        open_count=open_count,
+        resolved_count=resolved_count,
+        avg_rating=avg_rating
+    )
+
+
+## B6. ADMIN DATABASE OVERVIEW - System-wide stats
+@app.route('/admin/database')
+@login_required
+def admin_database():
+    """
+    Admin database overview page showing system-wide statistics.
+    Displays counts of users, complaints, responses, and recent activity.
+    """
+    if current_user.role != 'admin':
+        flash('❌ Unauthorized!', 'error')
+        return redirect(url_for('index'))
+
+    # User stats
+    total_users = User.query.count()
+    active_users = User.query.filter_by(is_active=True).count()
+    inactive_users = User.query.filter_by(is_active=False).count()
+
+    # Complaint stats
+    total_complaints = Complaint.query.count()
+    open_complaints = Complaint.query.filter_by(status='open').count()
+    in_progress_complaints = Complaint.query.filter_by(status='in_progress').count()
+    resolved_complaints = Complaint.query.filter_by(status='resolved').count()
+    closed_complaints = Complaint.query.filter_by(status='closed').count()
+    unassigned_complaints = Complaint.query.filter(Complaint.assigned_to == None).count()
+    high_priority_complaints = Complaint.query.filter_by(priority='high').count()
+
+    # Response stats
+    total_responses = Response.query.count()
+
+    # Get 10 most recent complaints
+    recent_complaints = Complaint.query.order_by(Complaint.created_at.desc()).limit(10).all()
+
+    return render_template(
+        'admin/database.html',
+        total_users=total_users,
+        active_users=active_users,
+        inactive_users=inactive_users,
+        total_complaints=total_complaints,
+        open_complaints=open_complaints,
+        in_progress_complaints=in_progress_complaints,
+        resolved_complaints=resolved_complaints,
+        closed_complaints=closed_complaints,
+        unassigned_complaints=unassigned_complaints,
+        high_priority_complaints=high_priority_complaints,
+        total_responses=total_responses,
+        recent_complaints=recent_complaints
+    )
 
 
 @app.route('/admin/users/create-manager', methods=['POST'])
@@ -821,31 +1060,21 @@ def update_user_role(user_id):
         flash('❌ Invalid role selected.', 'error')
         return redirect(url_for('admin_users'))
 
+    # Prevent admins changing their own role from the UI to avoid accidental lockout
+    if current_user.id == user.id:
+        flash('❌ You cannot change your own role.', 'error')
+        return redirect(url_for('admin_users'))
+
+    # Prevent removing the last remaining admin
+    if user.role == 'admin' and new_role != 'admin':
+        admin_count = User.query.filter_by(role='admin').count()
+        if admin_count <= 1:
+            flash('❌ Cannot remove the last admin account.', 'error')
+            return redirect(url_for('admin_users'))
+
     user.role = new_role
     db.session.commit()
     flash(f'✅ Role updated for {user.username} to {new_role}.', 'success')
-    return redirect(url_for('admin_users'))
-
-
-@app.route('/admin/users/<int:user_id>/deactivate', methods=['POST'])
-@login_required
-def deactivate_user(user_id):
-    """
-    Deactivate a user account (cannot deactivate self admin).
-    """
-    if current_user.role != 'admin':
-        flash('❌ Unauthorized!', 'error')
-        return redirect(url_for('index'))
-
-    user = User.query.get_or_404(user_id)
-
-    if user.id == current_user.id:
-        flash('❌ You cannot deactivate your own admin account.', 'error')
-        return redirect(url_for('admin_users'))
-
-    user.is_active_user = False
-    db.session.commit()
-    flash(f'✅ {user.username} has been deactivated.', 'success')
     return redirect(url_for('admin_users'))
 
 

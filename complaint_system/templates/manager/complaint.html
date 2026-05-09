@@ -69,7 +69,7 @@
     {% if complaint.responses %}
       {% for response in complaint.responses|sort(attribute='created_at', reverse=True) %}
         <div style="padding: 0.85rem; border-radius: 6px; background: #f9fafb; border-left: 3px solid #3b82f6; margin-bottom: 0.75rem;">
-          <p style="margin: 0 0 0.25rem 0;"><strong>{{ response.author.username }}</strong> • {{ response.created_at.strftime('%d %b %Y, %I:%M %p') }}</p>
+          <p style="margin: 0 0 0.25rem 0;"><strong>{{ response.response_author.username }}</strong> • {{ response.created_at.strftime('%d %b %Y, %I:%M %p') }}</p>
           <p style="margin: 0; white-space: pre-wrap;">{{ response.message }}</p>
         </div>
       {% endfor %}

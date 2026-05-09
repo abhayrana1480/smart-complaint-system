@@ -108,7 +108,7 @@
     {% for response in complaint.responses %}
     <div style="background: #f9fafb; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; border-left: 3px solid #3b82f6;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-        <p style="margin: 0; font-weight: 600; color: #1f2937;">👤 {{ response.author.username }}</p>
+        <p style="margin: 0; font-weight: 600; color: #1f2937;">👤 {{ response.response_author.username }}</p>
         <p style="margin: 0; font-size: 0.875rem; color: #6b7280;">{{ response.created_at.strftime('%d %b %Y, %I:%M %p') }}</p>
       </div>
       <p style="margin: 0; color: #374151; line-height: 1.6;">{{ response.message }}</p>

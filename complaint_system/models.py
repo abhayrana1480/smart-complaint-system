@@ -26,14 +26,35 @@ class User(UserMixin, db.Model):
     
     # Role: 'user' (regular user), 'manager' (complaint handler), 'admin' (system admin)
     role = db.Column(db.String(20), default='user', nullable=False)
-    is_active_user = db.Column(db.Boolean, default=True, nullable=False)
+    # is_active controls whether a user can log in (False = temporarily deactivated, data preserved)
+    is_active = db.Column(db.Boolean, default=True, nullable=False)
     
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
-    # Relationships: a user can have many complaints and many responses
-    complaints = db.relationship('Complaint', backref='author', lazy=True, foreign_keys='Complaint.user_id')
-    responses = db.relationship('Response', backref='author', lazy=True, foreign_keys='Response.author_id')
-    assigned_complaints = db.relationship('Complaint', backref='manager', lazy=True, foreign_keys='Complaint.assigned_to')
+    # Relationships with cascade delete:
+    # When a user is deleted, all their submitted complaints and responses are automatically deleted
+    complaints_submitted = db.relationship(
+        'Complaint', 
+        foreign_keys='Complaint.user_id',
+        backref='author', 
+        lazy=True,
+        cascade='all, delete-orphan'
+    )
+    responses_written = db.relationship(
+        'Response', 
+        foreign_keys='Response.author_id',
+        backref='response_author', 
+        lazy=True,
+        cascade='all, delete-orphan'
+    )
+    # Manager complaints (assigned to this user) - these are NOT cascade deleted
+    # because when a manager is deleted, we just set assigned_to=None on the complaints
+    assigned_complaints = db.relationship(
+        'Complaint', 
+        foreign_keys='Complaint.assigned_to',
+        backref='manager', 
+        lazy=True
+    )
     
     def set_password(self, password):
         """Hash a password before storing it - NEVER store plain text passwords!"""
@@ -42,11 +63,6 @@ class User(UserMixin, db.Model):
     def check_password(self, password):
         """Verify a password by comparing it with the stored hash"""
         return check_password_hash(self.password_hash, password)
-
-    @property
-    def is_active(self):
-        """Flask-Login uses this property to allow/block logins."""
-        return self.is_active_user
     
     def __repr__(self):
         return f'<User {self.username} ({self.role})>'

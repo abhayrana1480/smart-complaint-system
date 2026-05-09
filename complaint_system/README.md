@@ -22,7 +22,7 @@ The application helps a user submit a complaint, automatically analyzes the comp
 
 ## How The App Is Structured
 
-The app is built as a single Flask project inside the `complaint_system` folder. The main application file uses `template_folder='.'`, which means the HTML templates live directly in the same folder as the Python files instead of a separate `templates/` directory.
+The app is built as a single Flask project inside the `complaint_system` folder. The main application file uses a dedicated `templates/` directory, with role-based subfolders for auth, user, admin, and manager screens.
 
 Important files:
 
@@ -30,18 +30,20 @@ Important files:
 - `models.py` - SQLAlchemy models for users, complaints, and responses
 - `forms.py` - Flask-WTF forms for login, registration, complaint submission, and manager updates
 - `ai_module.py` - AI helper functions for complaint classification, sentiment analysis, response generation, and chatbot replies
-- `base.html` - shared layout and navigation
-- `admin_dashboard.html` - admin landing page
-- `admin_users.html` - admin user management page
-- `manager_dashboard.html` - manager landing page
-- `manager_complaint.html` - manager complaint detail page
-- `user_dashboard.html` - end-user dashboard
-- `user_submit.html` - complaint submission page
-- `my_complaints.html` - user complaint list page
-- `complaint_detail.html` - complaint detail page
-- `login.html` - login page
-- `register.html` - registration page
-- `error.html` - error display page
+- `templates/base.html` - shared layout and navigation
+- `templates/auth/login.html` - login page
+- `templates/auth/register.html` - registration page
+- `templates/user/dashboard.html` - end-user dashboard
+- `templates/user/submit.html` - complaint submission page
+- `templates/user/my_complaints.html` - user complaint list page
+- `templates/user/complaint_detail.html` - complaint detail page
+- `templates/manager/dashboard.html` - manager landing page
+- `templates/manager/complaint.html` - manager complaint detail page
+- `templates/admin/dashboard.html` - admin landing page
+- `templates/admin/users.html` - admin user management page
+- `templates/admin/database.html` - admin database overview page
+- `templates/admin/assignments.html` - admin assignment manager page
+- `templates/error.html` - error display page
 
 ## User Roles
 

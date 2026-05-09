@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile - {{ user.username }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(180deg, #f0f9ff 0%, #f8fafc 50%, #ecf0f5 100%);
+            color: #0f172a;
+            line-height: 1.6;
+            padding-bottom: 2rem;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem 1.1rem;
+        }
+
+        /* ============= PAGE HEADER ============= */
+        .back-link {
+            display: inline-block;
+            color: #0369a1;
+            text-decoration: none;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .back-link:hover {
+            color: #0ea5e9;
+            transform: translateX(-4px);
+        }
+
+        /* ============= PROFILE CARD ============= */
+        .profile-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.1);
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1e3a8a 0%, #0ea5e9 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: white;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+
+        .profile-info {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .profile-username {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-detail {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0.5rem 0;
+            font-size: 0.95rem;
+            color: #475569;
+        }
+
+        .profile-detail strong {
+            color: #0f172a;
+        }
+
+        .profile-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        /* ============= BADGES ============= */
+        .badge {
+            display: inline-block;
+            padding: 0.4rem 0.9rem;
+            border-radius: 99px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin: 0.25rem;
+        }
+
+        .badge.active {
+            background-color: #d1f3d1;
+            color: #15803d;
+        }
+
+        .badge.inactive {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge.user {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+
+        .badge.manager {
+            background-color: #e9d5ff;
+            color: #6b21a8;
+        }
+
+        .badge.admin {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        /* ============= STATS CARDS ============= */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.1);
+            text-align: center;
+            border-top: 4px solid #1e3a8a;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #1e3a8a;
+            margin: 0.5rem 0;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        /* ============= SECTION HEADER ============= */
+        .section {
+            margin-bottom: 2rem;
+        }
+
+        .section-header {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .section-header h2 {
+            font-size: 1.3rem;
+            color: #0f172a;
+            margin: 0;
+        }
+
+        /* ============= TABLE ============= */
+        .table-wrapper {
+            overflow-x: auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background-color: #f8fafc;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 0.95rem;
+        }
+
+        tbody tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .truncate {
+            max-width: 300px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* ============= EMPTY STATE ============= */
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            background: white;
+            border-radius: 10px;
+            color: #64748b;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.1);
+        }
+
+        /* ============= ACTION BUTTONS ============= */
+        button, .btn {
+            padding: 0.5rem 1.2rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+            white-space: nowrap;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background-color: #1e3a8a;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #1e40af;
+        }
+
+        .btn-warning {
+            background-color: #f59e0b;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background-color: #d97706;
+        }
+
+        .btn-success {
+            background-color: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #059669;
+        }
+
+        .btn-danger {
+            background-color: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #dc2626;
+        }
+
+        /* ============= MODAL ============= */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 1rem;
+        }
+
+        .modal-username {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1e3a8a;
+            margin: 1rem 0;
+        }
+
+        .modal-text {
+            color: #475569;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .modal-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .modal-btn-cancel {
+            background-color: #e2e8f0;
+            color: #475569;
+        }
+
+        .modal-btn-cancel:hover {
+            background-color: #cbd5e1;
+        }
+
+        .modal-btn-confirm {
+            background-color: #ef4444;
+            color: white;
+        }
+
+        .modal-btn-confirm:hover {
+            background-color: #dc2626;
+        }
+
+        .hidden-form {
+            display: none;
+        }
+
+        /* ============= RESPONSIVE ============= */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem 0.5rem;
+            }
+
+            .profile-card {
+                flex-direction: column;
+                text-align: center;
+                padding: 1.5rem;
+            }
+
+            .profile-info {
+                width: 100%;
+            }
+
+            .profile-actions {
+                width: 100%;
+            }
+
+            .stats-row {
+                grid-template-columns: 1fr 1fr;
+                gap: 1rem;
+            }
+
+            th, td {
+                padding: 0.75rem 0.5rem;
+                font-size: 0.85rem;
+            }
+
+            button, .btn {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.8rem;
+            }
+
+            .modal {
+                max-width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    {% if current_user.is_authenticated %}
+    <nav style="background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 35%, #1e40af 65%, #0ea5e9 100%); color: white; padding: 1rem 2.5rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 20px 50px rgba(15, 23, 42, 0.35); position: sticky; top: 0; z-index: 100; border-bottom: 2px solid rgba(14, 165, 233, 0.4);">
+        <div style="display: flex; align-items: center; gap: 1rem; cursor: pointer;">
+            <div style="width: 48px; height: 48px; border-radius: 14px; background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.3); display: grid; place-items: center; font-size: 1.4rem;">📋</div>
+            <div>
+                <h1 style="font-size: 1.35rem; font-weight: 800; margin: 0; color: white;">User Profile</h1>
+                <small style="display: block; font-size: 0.8rem; opacity: 0.92; color: #38bdf8;">{{ user.username }}</small>
+            </div>
+        </div>
+        <div style="display: flex; gap: 0.8rem; align-items: center;">
+            <span style="color: #e0f2fe;">👤 {{ current_user.username }}</span>
+            {% if current_user.role == 'admin' %}
+            <a href="{{ url_for('admin_dashboard') }}" style="color: #e0f2fe; text-decoration: none; padding: 0.65rem 1.2rem; border-radius: 10px; font-weight: 700;">📊 Dashboard</a>
+            <a href="{{ url_for('admin_users') }}" style="color: #e0f2fe; text-decoration: none; padding: 0.65rem 1.2rem; border-radius: 10px; font-weight: 700;">👥 Users</a>
+            <a href="{{ url_for('admin_database') }}" style="color: #e0f2fe; text-decoration: none; padding: 0.65rem 1.2rem; border-radius: 10px; font-weight: 700;">📊 Database</a>
+            <a href="{{ url_for('admin_assignments') }}" style="color: #e0f2fe; text-decoration: none; padding: 0.65rem 1.2rem; border-radius: 10px; font-weight: 700;">Assignment Manager</a>
+            {% endif %}
+            <a href="{{ url_for('logout') }}" style="color: #e0f2fe; text-decoration: none; padding: 0.65rem 1.2rem; border-radius: 10px; font-weight: 700;">🚪 Logout</a>
+        </div>
+    </nav>
+    {% endif %}
+
+    <div class="container">
+        <!-- Back Link -->
+        <a href="{{ url_for('admin_users') }}" class="back-link">← Back to User Management</a>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <div style="margin-bottom: 2rem;">
+                {% for category, message in messages %}
+                <div style="padding: 1rem 1.5rem; margin-bottom: 1rem; border-radius: 6px; border-left: 5px solid {% if category == 'success' %}#22c55e{% elif category == 'error' %}#ef4444{% else %}#3b82f6{% endif %}; background-color: {% if category == 'success' %}#d1f3d1; color: #15803d{% elif category == 'error' %}#fee2e2; color: #991b1b{% else %}#dbeafe; color: #1e40af{% endif %};">{{ message }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- PROFILE CARD -->
+        <div class="profile-card">
+            <div class="profile-avatar">{{ user.username[0].upper() }}</div>
+            <div class="profile-info" style="flex: 1;">
+                <div class="profile-username">{{ user.username }}</div>
+                <div class="profile-detail"><strong>Email:</strong> {{ user.email }}</div>
+                <div class="profile-detail"><strong>Role:</strong> <span class="badge {{ user.role }}">{{ user.role.upper() }}</span></div>
+                <div class="profile-detail">
+                    <strong>Status:</strong>
+                    {% if user.is_active %}
+                    <span class="badge active">Active</span>
+                    {% else %}
+                    <span class="badge inactive">Deactivated</span>
+                    {% endif %}
+                </div>
+                <div class="profile-detail"><strong>Member Since:</strong> {{ user.created_at.strftime('%d %B %Y') }}</div>
+            </div>
+            <div class="profile-actions">
+                {% if user.is_active %}
+                <form method="POST" action="{{ url_for('deactivate_user', user_id=user.id) }}" style="display: inline;">
+                    <button type="submit" class="btn btn-warning" onclick="return confirm('Deactivate this user?');">Deactivate Account</button>
+                </form>
+                {% else %}
+                <form method="POST" action="{{ url_for('reactivate_user', user_id=user.id) }}" style="display: inline;">
+                    <button type="submit" class="btn btn-success">Reactivate Account</button>
+                </form>
+                {% endif %}
+                {% if user.role != 'admin' %}
+                <button class="btn btn-danger" onclick="openDeleteModal({{ user.id }}, '{{ user.username }}')">Delete Account ⚠️</button>
+                {% else %}
+                <span style="font-size: 0.9rem; color: #64748b; padding: 0.5rem;">[Admin account - cannot delete]</span>
+                {% endif %}
+                
+                {% if current_user.role == 'admin' and current_user.id != user.id %}
+                <form method="POST" action="{{ url_for('update_user_role', user_id=user.id) }}" style="margin-top:8px; display:flex; gap:8px; align-items:center;">
+                    <label for="roleSelect" style="font-weight:700; color:#475569;">Change Role:</label>
+                    <select id="roleSelect" name="role" class="role-select">
+                        <option value="user" {% if user.role == 'user' %}selected{% endif %}>User</option>
+                        <option value="manager" {% if user.role == 'manager' %}selected{% endif %}>Manager</option>
+                        <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Admin</option>
+                    </select>
+                    <button type="submit" class="btn btn-primary">Update Role</button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- STATS ROW -->
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-label">Total Complaints</div>
+                <div class="stat-number">{{ total_complaints }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Open</div>
+                <div class="stat-number">{{ open_count }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Resolved</div>
+                <div class="stat-number">{{ resolved_count }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Avg Rating</div>
+                <div class="stat-number">{% if avg_rating %}{{ avg_rating }} ⭐{% else %}N/A{% endif %}</div>
+            </div>
+        </div>
+
+        <!-- COMPLAINT HISTORY -->
+        <div class="section">
+            <div class="section-header">
+                <h2>Complaint History</h2>
+            </div>
+            
+            {% if complaints %}
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Title</th>
+                            <th>Category</th>
+                            <th>Priority</th>
+                            <th>Status</th>
+                            <th>Assigned To</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for complaint in complaints %}
+                        <tr>
+                            <td>#{{ complaint.id }}</td>
+                            <td title="{{ complaint.title }}" class="truncate">{{ complaint.title }}</td>
+                            <td><span class="badge" style="background-color: #dbeafe; color: #1e40af;">{{ complaint.category }}</span></td>
+                            <td>
+                                <span class="badge" style="background-color: {% if complaint.priority == 'high' %}#fee2e2; color: #991b1b{% elif complaint.priority == 'medium' %}#fef3c7; color: #92400e{% else %}#d1f3d1; color: #15803d{% endif %};">{{ complaint.priority }}</span>
+                            </td>
+                            <td><span class="badge" style="background-color: #e9d5ff; color: #6b21a8;">{{ complaint.status }}</span></td>
+                            <td>{% if complaint.manager %}{{ complaint.manager.username }}{% else %}<span style="color: #64748b;">Unassigned</span>{% endif %}</td>
+                            <td>{{ complaint.created_at.strftime('%Y-%m-%d') }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                This user has not submitted any complaints yet.
+            </div>
+            {% endif %}
+        </div>
+
+    </div>
+
+    <!-- DELETE CONFIRMATION MODAL -->
+    <div class="modal-overlay" id="deleteModal">
+        <div class="modal">
+            <div class="modal-title">⚠️ Permanently Delete User?</div>
+            <div class="modal-username" id="deleteUserName"></div>
+            <div class="modal-text">
+                This will permanently delete this user's account and ALL their complaints and responses. This action cannot be undone.
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-cancel" onclick="closeDeleteModal()">Cancel</button>
+                <button class="modal-btn modal-btn-confirm" onclick="confirmDelete()">Yes, Delete Permanently</button>
+            </div>
+        </div>
+    </div>
+
+    <form id="deleteForm" method="POST" class="hidden-form"></form>
+
+    <script>
+        let selectedUserId = null;
+
+        function openDeleteModal(userId, username) {
+            selectedUserId = userId;
+            document.getElementById('deleteUserName').textContent = username;
+            document.getElementById('deleteModal').classList.add('active');
+        }
+
+        function closeDeleteModal() {
+            selectedUserId = null;
+            document.getElementById('deleteModal').classList.remove('active');
+        }
+
+        function confirmDelete() {
+            if (selectedUserId) {
+                const deleteForm = document.getElementById('deleteForm');
+                deleteForm.action = `/admin/delete_user/${selectedUserId}`;
+                deleteForm.method = 'POST';
+                deleteForm.submit();
+            }
+        }
+
+        document.getElementById('deleteModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeDeleteModal();
+            }
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeDeleteModal();
+            }
+        });
+    </script>
+</body>
+</html>

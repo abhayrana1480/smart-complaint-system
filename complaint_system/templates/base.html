@@ -674,6 +674,7 @@
         {% if current_user.role == 'admin' %}
         <a href="{{ url_for('admin_dashboard') }}">📊 Admin Dashboard</a>
         <a href="{{ url_for('admin_users') }}">👥 Users</a>
+        <a href="{{ url_for('admin_database') }}">📊 Database</a>
         <a href="{{ url_for('admin_assignments') }}">Assignment Manager</a>
         {% elif current_user.role == 'manager' %}
         <a href="{{ url_for('manager_dashboard') }}">📋 Queue</a>

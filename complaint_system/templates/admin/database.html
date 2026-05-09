@@ -1,0 +1,517 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Database Overview - Admin</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(
+          180deg,
+          #f0f9ff 0%,
+          #f8fafc 50%,
+          #ecf0f5 100%
+        );
+        color: #0f172a;
+        line-height: 1.6;
+        padding-bottom: 2rem;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem 1.1rem;
+      }
+
+      /* ============= PAGE HEADER ============= */
+      .page-header {
+        margin-bottom: 2.5rem;
+      }
+
+      .page-header h1 {
+        font-size: 2rem;
+        color: #0f172a;
+        margin-bottom: 0.5rem;
+      }
+
+      .page-header p {
+        color: #475569;
+        font-size: 1rem;
+      }
+
+      .page-note {
+        color: #64748b;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+        font-style: italic;
+      }
+
+      /* ============= STATS CARDS ============= */
+      .stats-grid {
+        display: grid;
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+      }
+
+      .stat-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.1);
+        text-align: center;
+        border-top: 4px solid #1e3a8a;
+      }
+
+      .stat-card .stat-number {
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: #1e3a8a;
+        margin: 0.5rem 0;
+      }
+
+      .stat-card .stat-label {
+        font-size: 0.9rem;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+      }
+
+      /* ============= GRID SECTIONS ============= */
+      .card-grid-3 {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+      }
+
+      .card-grid-4 {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+      }
+
+      /* ============= SECTION HEADER ============= */
+      .section {
+        margin-bottom: 3rem;
+      }
+
+      .section-header {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #e2e8f0;
+      }
+
+      .section-header h2 {
+        font-size: 1.4rem;
+        color: #0f172a;
+        margin: 0;
+      }
+
+      /* ============= TABLE ============= */
+      .table-wrapper {
+        overflow-x: auto;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.1);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      thead {
+        background-color: #f8fafc;
+        border-bottom: 2px solid #e2e8f0;
+      }
+
+      th {
+        padding: 1rem;
+        text-align: left;
+        font-weight: 700;
+        font-size: 0.9rem;
+        color: #475569;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      td {
+        padding: 1rem;
+        border-bottom: 1px solid #e2e8f0;
+        font-size: 0.95rem;
+      }
+
+      tbody tr:hover {
+        background-color: #f8fafc;
+      }
+
+      /* ============= BADGES ============= */
+      .badge {
+        display: inline-block;
+        padding: 0.35rem 0.75rem;
+        border-radius: 99px;
+        font-size: 0.8rem;
+        font-weight: 600;
+      }
+
+      .badge-category {
+        background-color: #dbeafe;
+        color: #1e40af;
+      }
+
+      .badge-high {
+        background-color: #fee2e2;
+        color: #991b1b;
+      }
+
+      .badge-medium {
+        background-color: #fef3c7;
+        color: #92400e;
+      }
+
+      .badge-low {
+        background-color: #d1f3d1;
+        color: #15803d;
+      }
+
+      .badge-status {
+        background-color: #e9d5ff;
+        color: #6b21a8;
+      }
+
+      .badge-user {
+        background-color: #dbeafe;
+        color: #1e40af;
+      }
+
+      .truncate {
+        max-width: 300px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      /* ============= EMPTY STATE ============= */
+      .empty-state {
+        text-align: center;
+        padding: 2rem;
+        background: white;
+        border-radius: 10px;
+        color: #64748b;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.1);
+      }
+
+      /* ============= RESPONSIVE ============= */
+      @media (max-width: 768px) {
+        .container {
+          padding: 1rem 0.5rem;
+        }
+
+        .page-header h1 {
+          font-size: 1.5rem;
+        }
+
+        .card-grid-3,
+        .card-grid-4 {
+          grid-template-columns: 1fr;
+        }
+
+        th,
+        td {
+          padding: 0.75rem 0.5rem;
+          font-size: 0.85rem;
+        }
+
+        .stat-card .stat-number {
+          font-size: 1.8rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navigation -->
+    {% if current_user.is_authenticated %}
+    <nav
+      style="
+        background: linear-gradient(
+          135deg,
+          #0f172a 0%,
+          #1e3a8a 35%,
+          #1e40af 65%,
+          #0ea5e9 100%
+        );
+        color: white;
+        padding: 1rem 2.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 20px 50px rgba(15, 23, 42, 0.35);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        border-bottom: 2px solid rgba(14, 165, 233, 0.4);
+      ">
+      <div
+        style="display: flex; align-items: center; gap: 1rem; cursor: pointer">
+        <div
+          style="
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            display: grid;
+            place-items: center;
+            font-size: 1.4rem;
+          ">
+          📊
+        </div>
+        <div>
+          <h1
+            style="
+              font-size: 1.35rem;
+              font-weight: 800;
+              margin: 0;
+              color: white;
+            ">
+            Database Overview
+          </h1>
+          <small
+            style="
+              display: block;
+              font-size: 0.8rem;
+              opacity: 0.92;
+              color: #38bdf8;
+            "
+            >Live System Stats</small
+          >
+        </div>
+      </div>
+      <div style="display: flex; gap: 0.8rem; align-items: center">
+        <span style="color: #e0f2fe"
+          >👤 {{ current_user.username }} ({{ current_user.role.title()
+          }})</span
+        >
+        {% if current_user.role == 'admin' %}
+        <a
+          href="{{ url_for('admin_dashboard') }}"
+          style="
+            color: #e0f2fe;
+            text-decoration: none;
+            padding: 0.65rem 1.2rem;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.95rem;
+          "
+          >📊 Dashboard</a
+        >
+        <a
+          href="{{ url_for('admin_users') }}"
+          style="
+            color: #e0f2fe;
+            text-decoration: none;
+            padding: 0.65rem 1.2rem;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.95rem;
+          "
+          >👥 Users</a
+        >
+        <a
+          href="{{ url_for('admin_database') }}"
+          style="
+            color: #e0f2fe;
+            text-decoration: none;
+            padding: 0.65rem 1.2rem;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.95rem;
+          "
+          >📊 Database</a
+        >
+        <a
+          href="{{ url_for('admin_assignments') }}"
+          style="
+            color: #e0f2fe;
+            text-decoration: none;
+            padding: 0.65rem 1.2rem;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.95rem;
+          "
+          >Assignment Manager</a
+        >
+        {% endif %}
+        <a
+          href="{{ url_for('logout') }}"
+          style="
+            color: #e0f2fe;
+            text-decoration: none;
+            padding: 0.65rem 1.2rem;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.95rem;
+          "
+          >🚪 Logout</a
+        >
+      </div>
+    </nav>
+    {% endif %}
+
+    <div class="container">
+      <!-- Flash Messages -->
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %}
+      <div style="margin-bottom: 2rem">
+        {% for category, message in messages %}
+        <div
+          style="padding: 1rem 1.5rem; margin-bottom: 1rem; border-radius: 6px; border-left: 5px solid {% if category == 'success' %}#22c55e{% elif category == 'error' %}#ef4444{% else %}#3b82f6{% endif %}; background-color: {% if category == 'success' %}#d1f3d1; color: #15803d{% elif category == 'error' %}#fee2e2; color: #991b1b{% else %}#dbeafe; color: #1e40af{% endif %};">
+          {{ message }}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %} {% endwith %}
+
+      <!-- PAGE HEADER -->
+      <div class="page-header">
+        <h1>Database Overview</h1>
+        <p>Live summary of all data stored in complaints.db</p>
+        <p class="page-note">
+          📊 Data refreshes every time you reload this page.
+        </p>
+      </div>
+
+      <!-- USER STATS (3-column grid) -->
+      <div class="card-grid-3">
+        <div class="stat-card">
+          <div class="stat-label">Total Users</div>
+          <div class="stat-number">{{ total_users }}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Active Users</div>
+          <div class="stat-number">{{ active_users }}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Deactivated Users</div>
+          <div class="stat-number">{{ inactive_users }}</div>
+        </div>
+      </div>
+
+      <!-- COMPLAINT STATS (first row: 4 cards) -->
+      <div style="margin-bottom: 1.5rem">
+        <div class="card-grid-4">
+          <div class="stat-card">
+            <div class="stat-label">Total Complaints</div>
+            <div class="stat-number">{{ total_complaints }}</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Open</div>
+            <div class="stat-number">{{ open_complaints }}</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">In Progress</div>
+            <div class="stat-number">{{ in_progress_complaints }}</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Resolved</div>
+            <div class="stat-number">{{ resolved_complaints }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COMPLAINT STATS (second row: 3 cards) -->
+      <div style="margin-bottom: 3rem">
+        <div class="card-grid-3">
+          <div class="stat-card">
+            <div class="stat-label">Closed</div>
+            <div class="stat-number">{{ closed_complaints }}</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Unassigned</div>
+            <div class="stat-number">{{ unassigned_complaints }}</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">High Priority</div>
+            <div class="stat-number">{{ high_priority_complaints }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RESPONSE STATS -->
+      <div style="margin-bottom: 3rem">
+        <div class="card-grid-3">
+          <div class="stat-card">
+            <div class="stat-label">Total Responses</div>
+            <div class="stat-number">{{ total_responses }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RECENT ACTIVITY TABLE -->
+      <div class="section">
+        <div class="section-header">
+          <h2>10 Most Recent Complaints</h2>
+        </div>
+
+        {% if recent_complaints %}
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Submitted By</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for complaint in recent_complaints %}
+              <tr>
+                <td><strong>#{{ complaint.id }}</strong></td>
+                <td title="{{ complaint.title }}" class="truncate">
+                  {{ complaint.title }}
+                </td>
+                <td>
+                  <span class="badge badge-category"
+                    >{{ complaint.category }}</span
+                  >
+                </td>
+                <td>
+                  <span
+                    class="badge {% if complaint.priority == 'high' %}badge-high{% elif complaint.priority == 'medium' %}badge-medium{% else %}badge-low{% endif %};"
+                    >{{ complaint.priority }}</span
+                  >
+                </td>
+                <td>
+                  <span class="badge badge-status">{{ complaint.status }}</span>
+                </td>
+                <td>
+                  <span class="badge badge-user"
+                    >{{ complaint.author.username }}</span
+                  >
+                </td>
+                <td>{{ complaint.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="empty-state">No complaints found in the database yet.</div>
+        {% endif %}
+      </div>
+    </div>
+  </body>
+</html>
