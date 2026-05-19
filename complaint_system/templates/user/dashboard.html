@@ -3,150 +3,269 @@
 {% block title %}User Dashboard - Smart Complaint Management System{% endblock %}
 
 {% block content %}
-<!-- Floating Chatbot Widget -->
-<div id="chatbot-widget" style="position: fixed; bottom: 20px; right: 20px; width: 350px; max-height: 500px; border-radius: 12px; box-shadow: 0 5px 40px rgba(0, 0, 0, 0.16); background: white; display: flex; flex-direction: column; z-index: 1000; overflow: hidden;">
-  <!-- Header -->
-  <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1rem; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;">
-    <div>
-      <h3 style="margin: 0; font-size: 1rem;">🤖 Help Assistant</h3>
-      <p style="margin: 0.25rem 0 0 0; font-size: 0.85rem; opacity: 0.9;">Ask me anything!</p>
-    </div>
-    <button onclick="toggleChatbot()" style="background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer;">✕</button>
-  </div>
+<style>
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-3);
+    margin-bottom: var(--space-5);
+  }
 
-  <!-- Chat Messages -->
-  <div id="chatbot-messages" style="flex: 1; overflow-y: auto; padding: 1rem; background: #f9fafb; display: flex; flex-direction: column; gap: 0.75rem; max-height: 340px;">
-    <div style="background: white; padding: 0.75rem; border-radius: 8px; border-left: 3px solid #667eea;">
-      <p style="margin: 0; font-size: 0.9rem;">Hi! 👋 I'm here to help you with FAQs about complaint submission, status, and account management.</p>
-    </div>
-  </div>
+  .dashboard-stat {
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-soft);
+    background: var(--bg-surface);
+    box-shadow: var(--shadow-soft);
+  }
 
-  <!-- Input -->
-  <div style="border-top: 1px solid #e5e7eb; padding: 0.75rem; background: white; display: flex; gap: 0.5rem; flex-shrink: 0;">
-    <input id="chatbot-input" type="text" placeholder="Type your question..." style="flex: 1; padding: 0.6rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.9rem;" onkeypress="if(event.key==='Enter') sendChatbotMessage();">
-    <button onclick="sendChatbotMessage()" style="background: #667eea; color: white; border: none; border-radius: 6px; padding: 0.6rem 1rem; cursor: pointer; font-weight: 600;">Send</button>
-  </div>
-</div>
+  .dashboard-stat h3 {
+    margin-bottom: var(--space-2);
+  }
 
-<!-- Minimize Button (shown when widget is hidden) -->
-<div id="chatbot-minimized" style="position: fixed; bottom: 20px; right: 20px; display: none; z-index: 999;">
-  <button onclick="toggleChatbot()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 50%; width: 60px; height: 60px; font-size: 1.8rem; cursor: pointer; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); transition: transform 0.2s;">🤖</button>
-</div>
+  .dashboard-stat-value {
+    font-size: clamp(1.4rem, 3vw, 1.9rem);
+    font-weight: 800;
+    color: var(--text-primary);
+  }
 
-<script>
-  function toggleChatbot() {
-    const widget = document.getElementById('chatbot-widget');
-    const minimized = document.getElementById('chatbot-minimized');
-    if (widget.style.display === 'none') {
-      widget.style.display = 'flex';
-      minimized.style.display = 'none';
-    } else {
-      widget.style.display = 'none';
-      minimized.style.display = 'block';
+  .dashboard-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-bottom: var(--space-5);
+  }
+
+  .chatbot-widget {
+    position: fixed;
+    right: var(--space-4);
+    bottom: var(--space-4);
+    width: min(22rem, calc(100vw - (var(--space-4) * 2)));
+    max-height: 32rem;
+    z-index: 70;
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-soft);
+    background: var(--bg-surface-strong);
+    box-shadow: var(--shadow-raise);
+    overflow: hidden;
+  }
+
+  .chatbot-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-3);
+    border-bottom: 1px solid var(--border-soft);
+    background: linear-gradient(130deg, var(--accent-1), var(--accent-2));
+    color: var(--text-inverse);
+  }
+
+  .chatbot-close {
+    border: 1px solid color-mix(in srgb, var(--text-inverse) 44%, transparent);
+    background: transparent;
+    color: var(--text-inverse);
+    border-radius: var(--radius-sm);
+    min-height: 2rem;
+    min-width: 2rem;
+    cursor: pointer;
+  }
+
+  .chatbot-messages {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--space-3);
+    overflow-y: auto;
+    max-height: 19rem;
+    background: var(--bg-surface);
+  }
+
+  .chatbot-msg {
+    border-radius: var(--radius-md);
+    padding: var(--space-3);
+    border: 1px solid var(--border-soft);
+  }
+
+  .chatbot-msg.user {
+    align-self: flex-end;
+    background: color-mix(in srgb, var(--accent-1) 18%, var(--bg-surface-strong));
+  }
+
+  .chatbot-msg.bot {
+    background: var(--bg-surface-strong);
+    border-left: 0.24rem solid var(--accent-1);
+  }
+
+  .chatbot-input-row {
+    display: flex;
+    gap: var(--space-2);
+    border-top: 1px solid var(--border-soft);
+    padding: var(--space-3);
+    background: var(--bg-surface-strong);
+  }
+
+  .chatbot-input {
+    flex: 1;
+    min-height: 2.5rem;
+  }
+
+  .chatbot-minimized {
+    position: fixed;
+    right: var(--space-4);
+    bottom: var(--space-4);
+    z-index: 69;
+    display: none;
+  }
+
+  .chatbot-min-btn {
+    min-width: 3rem;
+    min-height: 3rem;
+    border-radius: 50%;
+    border: 1px solid var(--border-soft);
+    color: var(--text-inverse);
+    background: linear-gradient(130deg, var(--accent-1), var(--accent-2));
+    box-shadow: var(--shadow-raise);
+    cursor: pointer;
+    font-size: 1.5rem;
+  }
+
+  @media (max-width: 64rem) {
+    .dashboard-grid {
+      grid-template-columns: 1fr;
     }
   }
-
-  function sendChatbotMessage() {
-    const input = document.getElementById('chatbot-input');
-    const message = input.value.trim();
-    if (!message) return;
-
-    const messagesDiv = document.getElementById('chatbot-messages');
-    
-    // Add user message
-    const userMsg = document.createElement('div');
-    userMsg.style.cssText = 'background: #667eea; color: white; padding: 0.75rem; border-radius: 8px; align-self: flex-end; max-width: 80%;';
-    userMsg.textContent = message;
-    messagesDiv.appendChild(userMsg);
-
-    input.value = '';
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
-
-    // Send to backend
-    fetch('{{ url_for("chatbot_api") }}', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: message })
-    })
-    .then(r => r.json())
-    .then(data => {
-      const botMsg = document.createElement('div');
-      botMsg.style.cssText = 'background: white; padding: 0.75rem; border-radius: 8px; border-left: 3px solid #667eea;';
-      botMsg.textContent = data.response;
-      messagesDiv.appendChild(botMsg);
-      messagesDiv.scrollTop = messagesDiv.scrollHeight;
-    })
-    .catch(e => {
-      const errMsg = document.createElement('div');
-      errMsg.style.cssText = 'background: #fee2e2; padding: 0.75rem; border-radius: 8px; border-left: 3px solid #ef4444; color: #991b1b;';
-      errMsg.textContent = 'Error: Unable to get response.';
-      messagesDiv.appendChild(errMsg);
-      messagesDiv.scrollTop = messagesDiv.scrollHeight;
-    });
-  }
-</script>
-
+</style>
 
 <div class="content">
-  <h1>👤 User Dashboard</h1>
-  <p class="mb-4">
+  <h1 data-animate>User Dashboard</h1>
+  <p class="mb-4" data-animate style="--delay: 80ms;">
     Welcome, <strong>{{ current_user.username }}</strong>! Here is your complaint summary.
   </p>
 
-  <div style="display: grid; grid-template-columns: repeat(3, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
-    <div style="background: #dbeafe; border-left: 5px solid #2563eb; padding: 1rem; border-radius: 8px;">
-      <h3 style="margin-bottom: 0.25rem;">Open</h3>
-      <div style="font-size: 1.8rem; font-weight: 700; color: #1d4ed8;">{{ open_count }}</div>
-    </div>
-    <div style="background: #ffedd5; border-left: 5px solid #f59e0b; padding: 1rem; border-radius: 8px;">
-      <h3 style="margin-bottom: 0.25rem;">In Progress</h3>
-      <div style="font-size: 1.8rem; font-weight: 700; color: #c2410c;">{{ in_progress_count }}</div>
-    </div>
-    <div style="background: #dcfce7; border-left: 5px solid #22c55e; padding: 1rem; border-radius: 8px;">
-      <h3 style="margin-bottom: 0.25rem;">Resolved</h3>
-      <div style="font-size: 1.8rem; font-weight: 700; color: #15803d;">{{ resolved_count }}</div>
-    </div>
+  <div class="dashboard-grid" data-animate style="--delay: 120ms;">
+    <article class="dashboard-stat">
+      <h3>Open</h3>
+      <div class="dashboard-stat-value">{{ open_count }}</div>
+    </article>
+    <article class="dashboard-stat">
+      <h3>In Progress</h3>
+      <div class="dashboard-stat-value">{{ in_progress_count }}</div>
+    </article>
+    <article class="dashboard-stat">
+      <h3>Resolved</h3>
+      <div class="dashboard-stat-value">{{ resolved_count }}</div>
+    </article>
   </div>
 
-  <div style="display: flex; gap: 0.75rem; margin-bottom: 2rem;">
+  <div class="dashboard-actions" data-animate style="--delay: 170ms;">
     <a href="{{ url_for('submit_complaint') }}" class="btn btn-primary">📝 Submit New Complaint</a>
     <a href="{{ url_for('my_complaints') }}" class="btn btn-secondary">📋 View My Complaints</a>
   </div>
 
-  <h2>Recent Complaints (Last 5)</h2>
+  <h2 data-animate style="--delay: 210ms;">Recent Complaints (Last 5)</h2>
   {% if recent_complaints %}
-  <div style="overflow-x: auto;">
-    <table style="width: 100%; border-collapse: collapse; margin-top: 0.75rem;">
+  <div class="table-wrapper" data-animate style="--delay: 260ms;">
+    <table>
       <thead>
-        <tr style="background: #f3f4f6;">
-          <th style="text-align: left; padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Title</th>
-          <th style="text-align: left; padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Category</th>
-          <th style="text-align: left; padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Priority</th>
-          <th style="text-align: left; padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Status</th>
-          <th style="text-align: left; padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Created</th>
+        <tr>
+          <th>Title</th>
+          <th>Category</th>
+          <th>Priority</th>
+          <th>Status</th>
+          <th>Created</th>
         </tr>
       </thead>
       <tbody>
         {% for complaint in recent_complaints %}
         <tr>
-          <td style="padding: 0.75rem; border-bottom: 1px solid #f3f4f6;">{{ complaint.title }}</td>
-          <td style="padding: 0.75rem; border-bottom: 1px solid #f3f4f6;">{{ complaint.category }}</td>
-          <td style="padding: 0.75rem; border-bottom: 1px solid #f3f4f6;">
-            <span class="priority-badge priority-{{ complaint.priority }}">{{ complaint.priority.replace('_', ' ').title() }}</span>
-          </td>
-          <td style="padding: 0.75rem; border-bottom: 1px solid #f3f4f6;">
-            <span class="status-badge status-{{ complaint.status }}">{{ complaint.status.replace('_', ' ').title() }}</span>
-          </td>
-          <td style="padding: 0.75rem; border-bottom: 1px solid #f3f4f6;">{{ complaint.created_at.strftime('%d %b %Y') }}</td>
+          <td>{{ complaint.title }}</td>
+          <td>{{ complaint.category }}</td>
+          <td><span class="priority-badge priority-{{ complaint.priority }}">{{ complaint.priority.replace('_', ' ').title() }}</span></td>
+          <td><span class="status-badge status-{{ complaint.status }}">{{ complaint.status.replace('_', ' ').title() }}</span></td>
+          <td>{{ complaint.created_at.strftime('%d %b %Y') }}</td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
   {% else %}
-  <div class="info-box">
+  <div class="info-box" data-animate style="--delay: 220ms;">
     You have not submitted any complaints yet. Click <strong>Submit New Complaint</strong> to get started.
   </div>
   {% endif %}
 </div>
+
+<aside id="chatbot-widget" class="chatbot-widget" aria-label="Chat assistant" data-animate style="--delay: 300ms;">
+  <div class="chatbot-head">
+    <div>
+      <strong>🤖 Help Assistant</strong>
+      <div style="font-size: var(--text-caption-size);">Ask me anything</div>
+    </div>
+    <button type="button" class="chatbot-close" onclick="toggleChatbot()" aria-label="Minimize chatbot">✕</button>
+  </div>
+
+  <div id="chatbot-messages" class="chatbot-messages">
+    <div class="chatbot-msg bot">
+      Hi! 👋 I'm here to help with complaint submission, status, and account questions.
+    </div>
+  </div>
+
+  <div class="chatbot-input-row">
+    <input
+      id="chatbot-input"
+      class="chatbot-input form-input"
+      type="text"
+      placeholder="Type your question..."
+      onkeypress="if(event.key==='Enter') sendChatbotMessage();"
+      aria-label="Chat message input" />
+    <button type="button" class="btn btn-primary" onclick="sendChatbotMessage()">Send</button>
+  </div>
+</aside>
+
+<div id="chatbot-minimized" class="chatbot-minimized">
+  <button type="button" class="chatbot-min-btn" onclick="toggleChatbot()" aria-label="Open chatbot">🤖</button>
+</div>
+
+<script>
+  function toggleChatbot() {
+    const widget = document.getElementById("chatbot-widget");
+    const minimized = document.getElementById("chatbot-minimized");
+    if (widget.style.display === "none") {
+      widget.style.display = "flex";
+      minimized.style.display = "none";
+    } else {
+      widget.style.display = "none";
+      minimized.style.display = "block";
+    }
+  }
+
+  function appendChatMessage(text, author) {
+    const messagesDiv = document.getElementById("chatbot-messages");
+    const msg = document.createElement("div");
+    msg.className = `chatbot-msg ${author}`;
+    msg.textContent = text;
+    messagesDiv.appendChild(msg);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  }
+
+  function sendChatbotMessage() {
+    const input = document.getElementById("chatbot-input");
+    const message = input.value.trim();
+    if (!message) return;
+    appendChatMessage(message, "user");
+    input.value = "";
+
+    fetch('{{ url_for("chatbot_api") }}', {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: message }),
+    })
+      .then((response) => response.json())
+      .then((data) => appendChatMessage(data.response, "bot"))
+      .catch(() => appendChatMessage("Unable to fetch response right now.", "bot"));
+  }
+</script>
 {% endblock %}

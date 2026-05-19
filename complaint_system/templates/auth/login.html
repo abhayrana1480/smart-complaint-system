@@ -3,23 +3,46 @@
 {% block title %}Login - Smart Complaint Management System{% endblock %}
 
 {% block content %}
+<style>
+  .test-accounts {
+    margin-bottom: var(--space-4);
+  }
+
+  .test-accounts-list {
+    display: grid;
+    gap: var(--space-2);
+    margin-top: var(--space-2);
+    font-size: var(--text-caption-size);
+  }
+
+  .inline-code {
+    display: inline-block;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-soft);
+    background: var(--bg-surface-strong);
+    color: var(--text-primary);
+    padding: 0 var(--space-2);
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 0.8rem;
+  }
+</style>
 <div class="auth-container">
     <div class="auth-card">
         <h1 class="auth-title">🔐 Login</h1>
         <p class="auth-subtitle">Access your complaint management dashboard</p>
 
         <!-- Test Accounts Info Box -->
-        <div class="info-box">
+        <div class="info-box test-accounts" data-animate>
             <strong>🧪 Test Accounts:</strong>
-            <div style="margin-top: 8px; font-size: 13px; line-height: 1.8;">
-                <div>👤 User: <code style="background: white; padding: 2px 4px; border-radius: 3px;">user@college.com</code> / <code style="background: white; padding: 2px 4px; border-radius: 3px;">user123</code></div>
-                <div>👔 Manager: <code style="background: white; padding: 2px 4px; border-radius: 3px;">manager1@college.com</code> / <code style="background: white; padding: 2px 4px; border-radius: 3px;">manager123</code></div>
-                <div>👨‍💼 Admin: <code style="background: white; padding: 2px 4px; border-radius: 3px;">admin@college.com</code> / <code style="background: white; padding: 2px 4px; border-radius: 3px;">admin123</code></div>
+            <div class="test-accounts-list">
+                <div>👤 User: <span class="inline-code">user@college.com</span> / <span class="inline-code">user123</span></div>
+                <div>👔 Manager: <span class="inline-code">manager1@college.com</span> / <span class="inline-code">manager123</span></div>
+                <div>👨‍💼 Admin: <span class="inline-code">admin@college.com</span> / <span class="inline-code">admin123</span></div>
             </div>
         </div>
 
         <!-- Login Form -->
-        <form method="POST" novalidate class="auth-form">
+        <form method="POST" novalidate class="auth-form" data-animate style="--delay: 120ms;">
             {{ form.hidden_tag() }}
             
             <!-- Email Field -->

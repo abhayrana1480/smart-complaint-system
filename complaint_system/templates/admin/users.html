@@ -4,300 +4,132 @@
 
 {% block content %}
 <style>
-  .admin-users-page .page-header {
-    margin-bottom: 2rem;
-  }
-
-  .admin-users-page .stats-row {
+  .admin-users-page {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-    gap: 1rem;
-    margin-bottom: 2rem;
+    gap: var(--space-4);
   }
 
-  .admin-users-page .stat-card {
-    background: #fff;
-    border-radius: 12px;
-    border-top: 4px solid #1e3a8a;
-    padding: 1.2rem;
-    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: var(--space-3);
+  }
+
+  .stat-card {
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-lg);
+    background: var(--bg-surface);
+    box-shadow: var(--shadow-soft);
+    padding: var(--space-4);
     text-align: center;
   }
 
-  .admin-users-page .stat-number {
-    font-size: 2rem;
-    font-weight: 800;
-    color: #1e3a8a;
-  }
-
-  .admin-users-page .stat-label {
-    font-size: 0.8rem;
-    color: #64748b;
+  .stat-label {
+    font-size: var(--text-caption-size);
     text-transform: uppercase;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.03em;
     font-weight: 700;
   }
 
-  .admin-users-page .section {
-    margin-bottom: 2rem;
+  .stat-number {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: 800;
+    color: var(--text-primary);
   }
 
-  .admin-users-page .section-header {
+  .section {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .section-header {
     display: flex;
     align-items: center;
-    gap: 0.65rem;
-    margin-bottom: 1rem;
-    border-bottom: 2px solid #e2e8f0;
-    padding-bottom: 0.65rem;
+    gap: var(--space-2);
   }
 
-  .admin-users-page .status-indicator {
-    width: 12px;
-    height: 12px;
+  .status-indicator {
+    width: 0.75rem;
+    height: 0.75rem;
     border-radius: 50%;
   }
 
-  .admin-users-page .status-indicator.active {
-    background: #10b981;
+  .status-indicator.active {
+    background: var(--success);
   }
 
-  .admin-users-page .status-indicator.inactive {
-    background: #f59e0b;
+  .status-indicator.inactive {
+    background: var(--warning);
   }
 
-  .admin-users-page .table-wrapper {
-    overflow-x: auto;
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
-  }
-
-  .admin-users-page table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-
-  .admin-users-page thead {
-    background: #f8fafc;
-  }
-
-  .admin-users-page th {
-    color: #475569;
-    font-size: 0.83rem;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    padding: 0.9rem;
-  }
-
-  .admin-users-page td {
-    padding: 0.9rem;
-    border-top: 1px solid #e2e8f0;
-    font-size: 0.92rem;
-  }
-
-  .admin-users-page tbody tr {
-    transition: background-color 0.2s ease;
-  }
-
-  .admin-users-page tbody tr:hover {
-    background: #f8fafc;
-  }
-
-  .admin-users-page tbody.inactive-users tr {
-    background: #f7f7f7;
-  }
-
-  .admin-users-page tbody.inactive-users tr:hover {
-    background: #efefef;
-  }
-
-  .admin-users-page .badge {
-    display: inline-block;
-    border-radius: 999px;
-    padding: 0.3rem 0.7rem;
-    font-size: 0.76rem;
+  .row-link {
+    color: var(--accent-1);
+    text-decoration: none;
     font-weight: 700;
   }
 
-  .admin-users-page .badge.user {
-    background: #dbeafe;
-    color: #1e40af;
-  }
-
-  .admin-users-page .badge.manager {
-    background: #ede9fe;
-    color: #6d28d9;
-  }
-
-  .admin-users-page .badge.admin {
-    background: #fee2e2;
-    color: #b91c1c;
-  }
-
-  .admin-users-page .badge.active {
-    background: #dcfce7;
-    color: #15803d;
-  }
-
-  .admin-users-page .badge.inactive {
-    background: #fef3c7;
-    color: #92400e;
-  }
-
-  .admin-users-page .action-buttons {
+  .action-buttons {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: 0.45rem;
+    gap: var(--space-2);
   }
 
-  .admin-users-page .btn {
-    border: none;
-    border-radius: 7px;
-    font-size: 0.74rem;
-    font-weight: 700;
-    padding: 0.42rem 0.72rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
+  .compact-btn {
+    min-height: 2rem;
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-md);
+    font-size: 0.78rem;
   }
 
-  .admin-users-page .btn-view {
-    background: #e0f2fe;
-    color: #075985;
-    border: 1px solid #0ea5e9;
+  .role-select {
+    width: 8rem;
   }
 
-  .admin-users-page .btn-view:hover {
-    background: #0ea5e9;
-    color: #fff;
+  .admin-note {
+    font-size: var(--text-caption-size);
   }
 
-  .admin-users-page .btn-deactivate {
-    background: #fed7aa;
-    color: #9a3412;
-    border: 1px solid #f59e0b;
-  }
-
-  .admin-users-page .btn-deactivate:hover {
-    background: #f59e0b;
-    color: #fff;
-  }
-
-  .admin-users-page .btn-reactivate {
-    background: #bbf7d0;
-    color: #166534;
-    border: 1px solid #10b981;
-  }
-
-  .admin-users-page .btn-reactivate:hover {
-    background: #10b981;
-    color: #fff;
-  }
-
-  .admin-users-page .btn-delete {
-    background: #fee2e2;
-    color: #b91c1c;
-    border: 1px solid #ef4444;
-  }
-
-  .admin-users-page .btn-delete:hover {
-    background: #ef4444;
-    color: #fff;
-  }
-
-  .admin-users-page .role-select {
-    width: 120px;
-    border: 1px solid #cbd5e1;
-    border-radius: 7px;
-    padding: 0.34rem 0.5rem;
-    font-weight: 700;
-  }
-
-  .admin-users-page .modal-overlay {
+  .modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.45);
+    background: color-mix(in srgb, var(--text-primary) 35%, transparent);
+    backdrop-filter: blur(8px);
     display: none;
     align-items: center;
     justify-content: center;
-    z-index: 1000;
+    z-index: 80;
   }
 
-  .admin-users-page .modal-overlay.active {
+  .modal-overlay.active {
     display: flex;
   }
 
-  .admin-users-page .modal {
-    width: min(420px, 92vw);
-    background: #fff;
-    border-radius: 14px;
-    padding: 1.4rem;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.28);
-    animation: modalIn 0.24s ease;
+  .modal-card {
+    width: min(26rem, 92vw);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-xl);
+    background: var(--bg-surface);
+    box-shadow: var(--shadow-raise);
+    padding: var(--space-5);
     text-align: center;
   }
 
-  @keyframes modalIn {
-    from {
-      opacity: 0;
-      transform: translateY(-16px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  .admin-users-page .modal-buttons {
-    margin-top: 1rem;
+  .modal-actions {
+    margin-top: var(--space-4);
     display: flex;
     justify-content: center;
-    gap: 0.7rem;
-  }
-
-  .admin-users-page .modal-btn {
-    border: none;
-    border-radius: 8px;
-    padding: 0.65rem 1rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .admin-users-page .modal-btn-cancel {
-    background: #e2e8f0;
-    color: #475569;
-  }
-
-  .admin-users-page .modal-btn-cancel:hover {
-    background: #cbd5e1;
-  }
-
-  .admin-users-page .modal-btn-confirm {
-    background: #ef4444;
-    color: #fff;
-  }
-
-  .admin-users-page .modal-btn-confirm:hover {
-    background: #dc2626;
-  }
-
-  @media (max-width: 768px) {
-    .admin-users-page th,
-    .admin-users-page td {
-      font-size: 0.82rem;
-      padding: 0.65rem 0.45rem;
-    }
+    gap: var(--space-2);
   }
 </style>
 
 <div class="admin-users-page">
   <div class="page-header">
-    <h1>User Management</h1>
-    <p>Manage all user accounts, permissions, and data.</p>
+    <h1 data-animate>User Management</h1>
+    <p data-animate style="--delay: 80ms;">Manage all user accounts, roles, and account states.</p>
   </div>
 
-  <div class="stats-row">
+  <div class="stats-row" data-animate style="--delay: 120ms;">
     <div class="stat-card">
       <div class="stat-label">Total Users</div>
       <div class="stat-number">{{ active_users|length + inactive_users|length }}</div>
@@ -316,7 +148,7 @@
     </div>
   </div>
 
-  <div class="section">
+  <section class="section" data-animate style="--delay: 170ms;">
     <div class="section-header">
       <span class="status-indicator active"></span>
       <h2>Active Users</h2>
@@ -342,9 +174,7 @@
           <tr>
             <td>{{ loop.index }}</td>
             <td>
-              <a href="{{ url_for('admin_user_detail', user_id=user.id) }}" style="color: #0369a1; text-decoration: none; font-weight: 700;">
-                {{ user.username }}
-              </a>
+              <a href="{{ url_for('admin_user_detail', user_id=user.id) }}" class="row-link">{{ user.username }}</a>
             </td>
             <td>{{ user.email }}</td>
             <td><span class="badge {{ user.role }}">{{ user.role }}</span></td>
@@ -353,10 +183,10 @@
             <td><span class="badge active">Active</span></td>
             <td>
               <div class="action-buttons">
-                <a href="{{ url_for('admin_user_detail', user_id=user.id) }}" class="btn btn-view">View</a>
+                <a href="{{ url_for('admin_user_detail', user_id=user.id) }}" class="btn btn-secondary compact-btn">View</a>
                 {% if current_user.role == 'admin' %}
-                <form method="POST" action="{{ url_for('update_user_role', user_id=user.id) }}" style="display: inline;">
-                  <select name="role" class="role-select" onchange="this.form.submit()">
+                <form method="POST" action="{{ url_for('update_user_role', user_id=user.id) }}">
+                  <select name="role" class="form-input role-select" onchange="this.form.submit()">
                     <option value="user" {% if user.role == 'user' %}selected{% endif %}>User</option>
                     <option value="manager" {% if user.role == 'manager' %}selected{% endif %}>Manager</option>
                     <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Admin</option>
@@ -364,12 +194,12 @@
                 </form>
                 {% endif %}
                 {% if user.role != 'admin' %}
-                <form method="POST" action="{{ url_for('deactivate_user', user_id=user.id) }}" style="display: inline;">
-                  <button type="submit" class="btn btn-deactivate">Deactivate</button>
+                <form method="POST" action="{{ url_for('deactivate_user', user_id=user.id) }}">
+                  <button type="submit" class="btn btn-warning compact-btn">Deactivate</button>
                 </form>
-                <button class="btn btn-delete" onclick="openDeleteModal({{ user.id }}, '{{ user.username }}')">Delete ⚠️</button>
+                <button type="button" class="btn btn-danger compact-btn" onclick="openDeleteModal({{ user.id }}, '{{ user.username }}')">Delete</button>
                 {% else %}
-                <span style="font-size: 0.75rem; color: #64748b; padding: 0.4rem;">[Admin - Protected]</span>
+                <span class="admin-note">[Admin - Protected]</span>
                 {% endif %}
               </div>
             </td>
@@ -379,17 +209,16 @@
       </table>
     </div>
     {% else %}
-    <div class="card">No active users found.</div>
+    <div class="empty-state">No active users found.</div>
     {% endif %}
-  </div>
+  </section>
 
   {% if inactive_users %}
-  <div class="section">
+  <section class="section" data-animate style="--delay: 220ms;">
     <div class="section-header">
       <span class="status-indicator inactive"></span>
       <h2>Deactivated Accounts</h2>
     </div>
-
     <div class="table-wrapper">
       <table>
         <thead>
@@ -403,7 +232,7 @@
             <th>Actions</th>
           </tr>
         </thead>
-        <tbody class="inactive-users">
+        <tbody>
           {% for user in inactive_users %}
           <tr>
             <td>{{ loop.index }}</td>
@@ -414,10 +243,10 @@
             <td><span class="badge inactive">Deactivated</span></td>
             <td>
               <div class="action-buttons">
-                <form method="POST" action="{{ url_for('reactivate_user', user_id=user.id) }}" style="display: inline;">
-                  <button type="submit" class="btn btn-reactivate">Reactivate</button>
+                <form method="POST" action="{{ url_for('reactivate_user', user_id=user.id) }}">
+                  <button type="submit" class="btn btn-success compact-btn">Reactivate</button>
                 </form>
-                <button class="btn btn-delete" onclick="openDeleteModal({{ user.id }}, '{{ user.username }}')">Delete ⚠️</button>
+                <button type="button" class="btn btn-danger compact-btn" onclick="openDeleteModal({{ user.id }}, '{{ user.username }}')">Delete</button>
               </div>
             </td>
           </tr>
@@ -425,24 +254,22 @@
         </tbody>
       </table>
     </div>
-  </div>
+  </section>
   {% endif %}
+</div>
 
-  <div class="modal-overlay" id="deleteModal">
-    <div class="modal">
-      <h3>⚠️ Permanently Delete User?</h3>
-      <p id="deleteUserName" style="margin-top: 0.5rem; font-weight: 700; color: #1e3a8a;"></p>
-      <p style="color: #475569; margin-top: 0.7rem;">
-        This permanently deletes the account and all related complaints and responses.
-      </p>
-      <div class="modal-buttons">
-        <button class="modal-btn modal-btn-cancel" onclick="closeDeleteModal()">Cancel</button>
-        <button class="modal-btn modal-btn-confirm" onclick="confirmDelete()">Yes, Delete</button>
-      </div>
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal-card">
+    <h3>⚠️ Permanently Delete User?</h3>
+    <p id="deleteUserName"></p>
+    <p>This permanently deletes the account and all related complaints and responses.</p>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+      <button type="button" class="btn btn-danger" onclick="confirmDelete()">Yes, Delete</button>
     </div>
   </div>
-  <form id="deleteForm" method="POST" style="display: none"></form>
 </div>
+<form id="deleteForm" method="POST" style="display: none;"></form>
 
 <script>
   let selectedUserId = null;
@@ -467,14 +294,14 @@
     }
   }
 
-  document.getElementById("deleteModal").addEventListener("click", function (e) {
-    if (e.target === this) {
+  document.getElementById("deleteModal").addEventListener("click", function (event) {
+    if (event.target === this) {
       closeDeleteModal();
     }
   });
 
-  document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape") {
+  document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape") {
       closeDeleteModal();
     }
   });

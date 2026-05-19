@@ -3,11 +3,28 @@
 {% block title %}Submit Complaint - Smart Complaint Management System{% endblock %}
 
 {% block content %}
-<div class="content">
-  <h1>📝 Submit a New Complaint</h1>
-  <p class="mb-4">Describe your issue clearly. AI will automatically classify category, sentiment, and priority.</p>
+<style>
+  .submit-grid {
+    display: grid;
+    gap: var(--space-4);
+  }
 
-  <form method="POST" novalidate>
+  .submit-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+
+  .input-note {
+    margin-top: var(--space-2);
+    font-size: var(--text-caption-size);
+  }
+</style>
+<div class="content">
+  <h1 data-animate>Submit a New Complaint</h1>
+  <p class="mb-4" data-animate style="--delay: 80ms;">Describe your issue clearly. AI will classify category, sentiment, and priority automatically.</p>
+
+  <form method="POST" novalidate class="submit-grid" data-animate style="--delay: 140ms;">
     {{ form.hidden_tag() }}
 
     <div class="form-group">
@@ -50,12 +67,12 @@
       {% else %}
         {{ form.category(class="form-input") }}
       {% endif %}
-      <small style="display: block; margin-top: 0.4rem; color: #64748b;">
+      <small class="input-note">
         Your selected category helps context, but final category is automatically assigned by AI.
       </small>
     </div>
 
-    <div style="display: flex; gap: 0.75rem;">
+    <div class="submit-actions">
       <button type="submit" class="btn btn-primary">🚀 Submit Complaint</button>
       <a href="{{ url_for('user_dashboard') }}" class="btn btn-secondary">⬅ Back to Dashboard</a>
     </div>

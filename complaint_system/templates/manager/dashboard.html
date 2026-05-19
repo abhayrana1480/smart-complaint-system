@@ -3,37 +3,42 @@
 {% block title %}Manager Dashboard - Smart Complaint Management System{% endblock %}
 
 {% block content %}
+<style>
+  .queue-table-wrap {
+    overflow-x: auto;
+  }
+</style>
 <div class="content">
-  <h1>👔 Manager Queue</h1>
-  <p class="mb-4">Complaints assigned to you, sorted by priority.</p>
+  <h1 data-animate>Manager Queue</h1>
+  <p class="mb-4" data-animate style="--delay: 80ms;">Complaints assigned to you, sorted by priority.</p>
 
   {% if complaints %}
-  <div style="overflow-x: auto;">
-    <table style="width: 100%; border-collapse: collapse;">
+  <div class="queue-table-wrap" data-animate style="--delay: 140ms;">
+    <table>
       <thead>
-        <tr style="background: #f3f4f6;">
-          <th style="text-align: left; padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Title</th>
-          <th style="text-align: left; padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Category</th>
-          <th style="text-align: left; padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Priority</th>
-          <th style="text-align: left; padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Sentiment</th>
-          <th style="text-align: left; padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Status</th>
-          <th style="text-align: left; padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">SLA (Days)</th>
-          <th style="text-align: left; padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Action</th>
+        <tr>
+          <th>Title</th>
+          <th>Category</th>
+          <th>Priority</th>
+          <th>Sentiment</th>
+          <th>Status</th>
+          <th>SLA (Days)</th>
+          <th>Action</th>
         </tr>
       </thead>
       <tbody>
         {% for complaint in complaints %}
         <tr>
-          <td style="padding: 0.75rem; border-bottom: 1px solid #f3f4f6;">
+          <td>
             <strong>#{{ complaint.id }}</strong> - {{ complaint.title }}
           </td>
-          <td style="padding: 0.75rem; border-bottom: 1px solid #f3f4f6;">
+          <td>
             <span class="status-badge status-open">{{ complaint.category }}</span>
           </td>
-          <td style="padding: 0.75rem; border-bottom: 1px solid #f3f4f6;">
+          <td>
             <span class="priority-badge priority-{{ complaint.priority }}">{{ complaint.priority.replace('_', ' ').title() }}</span>
           </td>
-          <td style="padding: 0.75rem; border-bottom: 1px solid #f3f4f6;">
+          <td>
             {% if complaint.sentiment == 'negative' %}
               😡 Angry
             {% elif complaint.sentiment == 'positive' %}
@@ -42,13 +47,13 @@
               😐 Neutral
             {% endif %}
           </td>
-          <td style="padding: 0.75rem; border-bottom: 1px solid #f3f4f6;">
+          <td>
             <span class="status-badge status-{{ complaint.status }}">{{ complaint.status.replace('_', ' ').title() }}</span>
           </td>
-          <td style="padding: 0.75rem; border-bottom: 1px solid #f3f4f6;">
+          <td>
             {{ (now - complaint.created_at).days }}
           </td>
-          <td style="padding: 0.75rem; border-bottom: 1px solid #f3f4f6;">
+          <td>
             <a href="{{ url_for('manager_complaint', complaint_id=complaint.id) }}" class="btn btn-warning">
               Resolve
             </a>
@@ -59,7 +64,7 @@
     </table>
   </div>
   {% else %}
-  <div class="info-box">
+  <div class="info-box" data-animate style="--delay: 120ms;">
     <strong>Great job!</strong> You have no complaints assigned right now.
   </div>
   {% endif %}

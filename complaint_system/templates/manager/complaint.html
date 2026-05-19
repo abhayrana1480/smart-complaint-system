@@ -3,13 +3,36 @@
 {% block title %}Manage Complaint #{{ complaint.id }}{% endblock %}
 
 {% block content %}
+<style>
+  .complaint-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+    margin-bottom: var(--space-4);
+  }
+
+  .detail-panel {
+    margin-bottom: var(--space-4);
+    padding: var(--space-4);
+  }
+
+  .response-item {
+    padding: var(--space-3);
+    border-radius: var(--radius-md);
+    border-left: 0.28rem solid var(--accent-1);
+    background: var(--bg-surface-strong);
+    margin-bottom: var(--space-3);
+  }
+</style>
 <div class="content">
-  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-    <h1>🛠️ Complaint #{{ complaint.id }}</h1>
+  <div class="complaint-header" data-animate>
+    <h1>Complaint #{{ complaint.id }}</h1>
     <a href="{{ url_for('manager_dashboard') }}" class="btn btn-secondary">← Back to Queue</a>
   </div>
 
-  <div style="margin-bottom: 1.5rem; padding: 1rem; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb;">
+  <div class="surface detail-panel" data-animate style="--delay: 80ms;">
     <p><strong>Title:</strong> {{ complaint.title }}</p>
     <p><strong>User:</strong> {{ complaint.author.username }} ({{ complaint.author.email }})</p>
     <p><strong>Category:</strong> {{ complaint.category }}</p>
@@ -24,17 +47,17 @@
     <p><strong>Created:</strong> {{ complaint.created_at.strftime('%d %b %Y, %I:%M %p') }}</p>
   </div>
 
-  <div style="margin-bottom: 1.5rem; padding: 1rem; background: #fff; border-radius: 8px; border: 1px solid #e5e7eb;">
+  <div class="surface detail-panel" data-animate style="--delay: 120ms;">
     <h3>Complaint Description</h3>
-    <p style="white-space: pre-wrap;">{{ complaint.description }}</p>
+    <p>{{ complaint.description }}</p>
   </div>
 
-  <div style="padding: 1rem; background: #eff6ff; border-left: 4px solid #2563eb; border-radius: 8px; margin-bottom: 1.5rem;">
-    <h3 style="margin-bottom: 0.5rem;">🤖 AI Suggested Draft</h3>
-    <p style="margin: 0;">{{ complaint.ai_response }}</p>
+  <div class="info-box mb-4" data-animate style="--delay: 160ms;">
+    <h3>🤖 AI Suggested Draft</h3>
+    <p class="mb-2">{{ complaint.ai_response }}</p>
   </div>
 
-  <form method="POST" class="auth-form" style="margin-bottom: 2rem;">
+  <form method="POST" class="auth-form card mb-4" data-animate style="--delay: 200ms;">
     {{ form.hidden_tag() }}
 
     <div class="form-group">
@@ -64,17 +87,17 @@
     {{ form.submit(class="btn btn-primary") }}
   </form>
 
-  <div style="padding: 1rem; background: #fff; border-radius: 8px; border: 1px solid #e5e7eb;">
-    <h3 style="margin-bottom: 1rem;">💬 Previous Responses</h3>
+  <div class="surface detail-panel" data-animate style="--delay: 240ms;">
+    <h3>💬 Previous Responses</h3>
     {% if complaint.responses %}
       {% for response in complaint.responses|sort(attribute='created_at', reverse=True) %}
-        <div style="padding: 0.85rem; border-radius: 6px; background: #f9fafb; border-left: 3px solid #3b82f6; margin-bottom: 0.75rem;">
-          <p style="margin: 0 0 0.25rem 0;"><strong>{{ response.response_author.username }}</strong> • {{ response.created_at.strftime('%d %b %Y, %I:%M %p') }}</p>
-          <p style="margin: 0; white-space: pre-wrap;">{{ response.message }}</p>
+        <div class="response-item">
+          <p class="mb-2"><strong>{{ response.response_author.username }}</strong> • {{ response.created_at.strftime('%d %b %Y, %I:%M %p') }}</p>
+          <p>{{ response.message }}</p>
         </div>
       {% endfor %}
     {% else %}
-      <p style="margin: 0;">No responses added yet.</p>
+      <p>No responses added yet.</p>
     {% endif %}
   </div>
 </div>

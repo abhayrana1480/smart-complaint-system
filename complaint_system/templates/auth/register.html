@@ -4,12 +4,12 @@
 
 {% block content %}
 <div class="auth-container">
-    <div class="auth-card">
+    <div class="auth-card" data-animate>
         <h1 class="auth-title">📝 Create Account</h1>
         <p class="auth-subtitle">Join our complaint management system</p>
 
         <!-- Registration Form -->
-        <form method="POST" novalidate class="auth-form">
+        <form method="POST" novalidate class="auth-form" data-animate style="--delay: 120ms;">
             {{ form.hidden_tag() }}
             
             <!-- Username Field -->

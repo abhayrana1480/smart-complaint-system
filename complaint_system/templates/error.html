@@ -3,28 +3,49 @@
 {% block title %}{{ code }} - Smart Complaint Management System{% endblock %}
 
 {% block content %}
-<div class="content" style="max-width: 720px; margin: 2rem auto; text-align: center;">
-  <div
-    style="
-      width: 90px;
-      height: 90px;
-      margin: 0 auto 1rem auto;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2.2rem;
-      background: {% if code == 404 %}#dbeafe{% else %}#fee2e2{% endif %};
-      color: {% if code == 404 %}#1d4ed8{% else %}#b91c1c{% endif %};
-    "
-  >
+<style>
+  .error-card {
+    max-width: 44rem;
+    margin: var(--space-6) auto 0;
+    text-align: center;
+  }
+
+  .error-icon-wrap {
+    width: 5.5rem;
+    height: 5.5rem;
+    margin: 0 auto var(--space-4);
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--border-soft);
+    background: color-mix(in srgb, var(--accent-1) 14%, var(--bg-surface-strong));
+    color: var(--accent-1);
+    font-size: 2.2rem;
+  }
+
+  .error-icon-wrap.danger {
+    background: color-mix(in srgb, var(--danger) 14%, var(--bg-surface-strong));
+    color: var(--danger);
+  }
+
+  .error-actions {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+    margin-top: var(--space-4);
+  }
+</style>
+
+<div class="content error-card" data-animate>
+  <div class="error-icon-wrap {% if code != 404 %}danger{% endif %}">
     {% if code == 404 %}🔎{% else %}⛔{% endif %}
   </div>
 
-  <h1 style="margin-bottom: 0.5rem;">Error {{ code }}</h1>
-  <p style="font-size: 1.05rem; color: #4b5563; margin-bottom: 1.5rem;">{{ message }}</p>
+  <h1>Error {{ code }}</h1>
+  <p>{{ message }}</p>
 
-  <div style="display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap;">
+  <div class="error-actions">
     <a href="{{ url_for('index') }}" class="btn btn-primary">🏠 Back to Home</a>
     {% if current_user.is_authenticated %}
       {% if current_user.role == 'admin' %}

@@ -4,318 +4,99 @@
 
 {% block content %}
 <style>
-  .control-center-page .page-header {
-    margin-bottom: 2rem;
-  }
-
-  .control-center-page .page-note {
-    color: #64748b;
-    font-size: 0.9rem;
-    margin-top: 0.4rem;
-    font-style: italic;
-  }
-
-  .control-center-page .card-grid-3,
-  .control-center-page .card-grid-4 {
+  .control-center-page {
     display: grid;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
+    gap: var(--space-4);
   }
 
-  .control-center-page .card-grid-3 {
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: var(--space-3);
   }
 
-  .control-center-page .card-grid-4 {
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  }
-
-  .control-center-page .stat-card {
-    background: #fff;
-    border-radius: 12px;
-    border-top: 4px solid #1e3a8a;
-    padding: 1.1rem;
+  .stat-card {
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-lg);
+    background: var(--bg-surface);
+    box-shadow: var(--shadow-soft);
+    padding: var(--space-4);
     text-align: center;
-    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
   }
 
-  .control-center-page .stat-number {
-    font-size: 2rem;
-    color: #1e3a8a;
+  .stat-number {
+    font-size: clamp(1.4rem, 2.8vw, 2rem);
     font-weight: 800;
+    color: var(--text-primary);
   }
 
-  .control-center-page .stat-label {
-    font-size: 0.8rem;
+  .stat-label {
+    font-size: var(--text-caption-size);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: #64748b;
+    letter-spacing: 0.03em;
     font-weight: 700;
   }
 
-  .control-center-page .section {
-    margin-top: 1.25rem;
-  }
-
-  .control-center-page .section-header {
-    margin-bottom: 0.85rem;
-    border-bottom: 2px solid #e2e8f0;
-    padding-bottom: 0.6rem;
-  }
-
-  .control-center-page .table-wrapper {
-    overflow-x: auto;
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
-  }
-
-  .control-center-page table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-
-  .control-center-page thead {
-    background: #f8fafc;
-  }
-
-  .control-center-page th {
-    padding: 0.9rem;
-    font-size: 0.82rem;
-    color: #475569;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  .control-center-page td {
-    padding: 0.9rem;
-    border-top: 1px solid #e2e8f0;
-    font-size: 0.9rem;
-    vertical-align: top;
-  }
-
-  .control-center-page tbody tr:hover {
-    background: #f8fafc;
-  }
-
-  .control-center-page .badge {
-    display: inline-block;
-    padding: 0.3rem 0.7rem;
-    border-radius: 999px;
-    font-size: 0.76rem;
-    font-weight: 700;
-  }
-
-  .control-center-page .badge-category,
-  .control-center-page .badge-user {
-    background: #dbeafe;
-    color: #1e40af;
-  }
-
-  .control-center-page .badge-high {
-    background: #fee2e2;
-    color: #b91c1c;
-  }
-
-  .control-center-page .badge-medium {
-    background: #fef3c7;
-    color: #92400e;
-  }
-
-  .control-center-page .badge-low {
-    background: #dcfce7;
-    color: #15803d;
-  }
-
-  .control-center-page .badge-status {
-    background: #ede9fe;
-    color: #6d28d9;
-  }
-
-  .control-center-page .truncate {
-    max-width: 240px;
+  .truncate {
+    max-width: 16rem;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
-  .control-center-page .action-stack {
-    display: flex;
-    flex-direction: column;
-    gap: 0.55rem;
-    min-width: 230px;
+  .action-stack {
+    display: grid;
+    gap: var(--space-2);
+    min-width: 14.5rem;
   }
 
-  .control-center-page .action-details {
-    border: 1px solid #cbd5e1;
-    border-radius: 10px;
-    background: #f8fafc;
-    padding: 0.7rem;
+  .action-details {
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-md);
+    background: var(--bg-surface-strong);
+    padding: var(--space-3);
   }
 
-  .control-center-page .action-details summary {
+  .action-details summary {
     cursor: pointer;
-    list-style: none;
-    color: #1e3a8a;
     font-weight: 800;
+    color: var(--text-primary);
   }
 
-  .control-center-page .action-details summary::-webkit-details-marker {
-    display: none;
+  .action-form {
+    margin-top: var(--space-2);
+    display: grid;
+    gap: var(--space-2);
   }
 
-  .control-center-page .action-hint {
-    margin-top: 0.35rem;
-    font-size: 0.8rem;
-    color: #64748b;
-  }
-
-  .control-center-page .action-form {
-    margin-top: 0.65rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .control-center-page .action-label {
-    font-size: 0.74rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: #64748b;
-    font-weight: 800;
-  }
-
-  .control-center-page .action-textarea {
-    width: 100%;
-    min-height: 90px;
-    resize: vertical;
-    border: 1px solid #cbd5e1;
-    border-radius: 10px;
-    padding: 0.7rem;
-    font: inherit;
-  }
-
-  .control-center-page .action-buttons {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
-
-  .control-center-page .action-btn {
-    border: none;
-    border-radius: 10px;
-    padding: 0.55rem 0.8rem;
-    font-weight: 800;
-    cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-  }
-
-  .control-center-page .action-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
-  }
-
-  .control-center-page .action-btn-reply {
-    background: #dbeafe;
-    color: #1e40af;
-  }
-
-  .control-center-page .action-btn-resolve {
-    background: #dcfce7;
-    color: #166534;
-  }
-
-  .control-center-page .action-btn-delete {
-    background: #fee2e2;
-    color: #991b1b;
-  }
-
-  .control-center-page .empty-state {
-    text-align: center;
-    background: #fff;
-    padding: 1.5rem;
-    border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
-    color: #64748b;
-  }
-
-  @media (max-width: 768px) {
-    .control-center-page th,
-    .control-center-page td {
-      padding: 0.7rem 0.5rem;
-      font-size: 0.82rem;
-    }
+  .action-textarea {
+    min-height: 5.5rem;
   }
 </style>
 
-<div class="control-center-page">
+<div class="content control-center-page">
   <div class="page-header">
-    <h1>Complaint Control Center</h1>
-    <p>Live summary of all data stored in complaints.db.</p>
-    <p class="page-note">🛡️ Use the actions below to reply, resolve, or delete complaints directly.</p>
+    <h1 data-animate>Complaint Control Center</h1>
+    <p data-animate style="--delay: 80ms;">Live summary of all complaint-system records and operations.</p>
+    <p class="mb-4" data-animate style="--delay: 120ms;">Use actions below to reply, resolve, or delete complaints directly.</p>
   </div>
 
-  <div class="card-grid-3">
-    <div class="stat-card">
-      <div class="stat-label">Total Users</div>
-      <div class="stat-number">{{ total_users }}</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Active Users</div>
-      <div class="stat-number">{{ active_users }}</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Deactivated Users</div>
-      <div class="stat-number">{{ inactive_users }}</div>
-    </div>
+  <div class="stats-grid" data-animate style="--delay: 160ms;">
+    <article class="stat-card"><div class="stat-label">Total Users</div><div class="stat-number">{{ total_users }}</div></article>
+    <article class="stat-card"><div class="stat-label">Active Users</div><div class="stat-number">{{ active_users }}</div></article>
+    <article class="stat-card"><div class="stat-label">Deactivated Users</div><div class="stat-number">{{ inactive_users }}</div></article>
+    <article class="stat-card"><div class="stat-label">Total Complaints</div><div class="stat-number">{{ total_complaints }}</div></article>
+    <article class="stat-card"><div class="stat-label">Open</div><div class="stat-number">{{ open_complaints }}</div></article>
+    <article class="stat-card"><div class="stat-label">In Progress</div><div class="stat-number">{{ in_progress_complaints }}</div></article>
+    <article class="stat-card"><div class="stat-label">Resolved</div><div class="stat-number">{{ resolved_complaints }}</div></article>
+    <article class="stat-card"><div class="stat-label">Closed</div><div class="stat-number">{{ closed_complaints }}</div></article>
+    <article class="stat-card"><div class="stat-label">Unassigned</div><div class="stat-number">{{ unassigned_complaints }}</div></article>
+    <article class="stat-card"><div class="stat-label">High Priority</div><div class="stat-number">{{ high_priority_complaints }}</div></article>
+    <article class="stat-card"><div class="stat-label">Total Responses</div><div class="stat-number">{{ total_responses }}</div></article>
   </div>
 
-  <div class="card-grid-4">
-    <div class="stat-card">
-      <div class="stat-label">Total Complaints</div>
-      <div class="stat-number">{{ total_complaints }}</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Open</div>
-      <div class="stat-number">{{ open_complaints }}</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">In Progress</div>
-      <div class="stat-number">{{ in_progress_complaints }}</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Resolved</div>
-      <div class="stat-number">{{ resolved_complaints }}</div>
-    </div>
-  </div>
-
-  <div class="card-grid-3">
-    <div class="stat-card">
-      <div class="stat-label">Closed</div>
-      <div class="stat-number">{{ closed_complaints }}</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Unassigned</div>
-      <div class="stat-number">{{ unassigned_complaints }}</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">High Priority</div>
-      <div class="stat-number">{{ high_priority_complaints }}</div>
-    </div>
-  </div>
-
-  <div class="card-grid-3">
-    <div class="stat-card">
-      <div class="stat-label">Total Responses</div>
-      <div class="stat-number">{{ total_responses }}</div>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-header">
-      <h2>10 Most Recent Complaints</h2>
-    </div>
-
+  <section data-animate style="--delay: 220ms;">
+    <h2>10 Most Recent Complaints</h2>
     {% if recent_complaints %}
     <div class="table-wrapper">
       <table>
@@ -336,34 +117,26 @@
           <tr>
             <td><strong>#{{ complaint.id }}</strong></td>
             <td title="{{ complaint.title }}" class="truncate">{{ complaint.title }}</td>
-            <td><span class="badge badge-category">{{ complaint.category }}</span></td>
-            <td>
-              <span class="badge {% if complaint.priority == 'high' %}badge-high{% elif complaint.priority == 'medium' %}badge-medium{% else %}badge-low{% endif %}">
-                {{ complaint.priority }}
-              </span>
-            </td>
-            <td><span class="badge badge-status">{{ complaint.status }}</span></td>
-            <td><span class="badge badge-user">{{ complaint.author.username }}</span></td>
+            <td><span class="badge user">{{ complaint.category }}</span></td>
+            <td><span class="priority-badge priority-{{ complaint.priority }}">{{ complaint.priority }}</span></td>
+            <td><span class="status-badge status-{{ complaint.status }}">{{ complaint.status }}</span></td>
+            <td><span class="badge user">{{ complaint.author.username }}</span></td>
             <td>{{ complaint.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
             <td>
               <div class="action-stack">
                 <details class="action-details">
                   <summary>Reply / Resolve</summary>
-                  <div class="action-hint">
-                    Sends an admin response and optionally updates the complaint state.
-                  </div>
                   <form method="POST" action="{{ url_for('admin_database_complaint_action', complaint_id=complaint.id) }}" class="action-form">
-                    <label class="action-label" for="message-{{ complaint.id }}">Message</label>
-                    <textarea id="message-{{ complaint.id }}" name="message" class="action-textarea" placeholder="Write the reply or resolution note">{% if complaint.ai_response %}{{ complaint.ai_response }}{% endif %}</textarea>
-                    <div class="action-buttons">
-                      <button type="submit" name="action" value="reply" class="action-btn action-btn-reply">Reply</button>
-                      <button type="submit" name="action" value="resolve" class="action-btn action-btn-resolve">Resolve</button>
+                    <label class="form-label" for="message-{{ complaint.id }}">Message</label>
+                    <textarea id="message-{{ complaint.id }}" name="message" class="form-input action-textarea" placeholder="Write the reply or resolution note">{% if complaint.ai_response %}{{ complaint.ai_response }}{% endif %}</textarea>
+                    <div class="action-stack">
+                      <button type="submit" name="action" value="reply" class="btn btn-secondary">Reply</button>
+                      <button type="submit" name="action" value="resolve" class="btn btn-success">Resolve</button>
                     </div>
                   </form>
                 </details>
-
                 <form method="POST" action="{{ url_for('admin_database_complaint_action', complaint_id=complaint.id) }}" onsubmit="return confirm('Delete this complaint permanently? This cannot be undone.');">
-                  <button type="submit" name="action" value="delete" class="action-btn action-btn-delete">Delete</button>
+                  <button type="submit" name="action" value="delete" class="btn btn-danger">Delete</button>
                 </form>
               </div>
             </td>
@@ -375,6 +148,6 @@
     {% else %}
     <div class="empty-state">No complaints found in the database yet.</div>
     {% endif %}
-  </div>
+  </section>
 </div>
 {% endblock %}

@@ -3,62 +3,80 @@
 {% block title %}My Complaints - Smart Complaint Management System{% endblock %}
 
 {% block content %}
-<div class="content">
-  <h1>📋 My Complaints</h1>
-  <p class="mb-4">Here is a full list of all complaints you have submitted.</p>
+<style>
+  .header-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+  }
 
-  <div style="display: flex; gap: 0.75rem; margin-bottom: 1.5rem;">
+  .row-link {
+    color: var(--accent-1);
+    text-decoration: none;
+    font-weight: 700;
+  }
+
+  .clickable-row {
+    cursor: pointer;
+  }
+</style>
+<div class="content">
+  <h1 data-animate>My Complaints</h1>
+  <p class="mb-4" data-animate style="--delay: 80ms;">Here is the full list of complaints you have submitted.</p>
+
+  <div class="header-actions" data-animate style="--delay: 120ms;">
     <a href="{{ url_for('submit_complaint') }}" class="btn btn-primary">📝 Submit New Complaint</a>
     <a href="{{ url_for('user_dashboard') }}" class="btn btn-secondary">🏠 Dashboard</a>
   </div>
 
   {% if complaints %}
-  <div style="overflow-x: auto;">
-    <table style="width: 100%; border-collapse: collapse;">
+  <div class="table-wrapper" data-animate style="--delay: 160ms;">
+    <table>
       <thead>
-        <tr style="background: #f3f4f6;">
-          <th style="text-align: left; padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">ID</th>
-          <th style="text-align: left; padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Title</th>
-          <th style="text-align: left; padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Category</th>
-          <th style="text-align: left; padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Priority</th>
-          <th style="text-align: left; padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Sentiment</th>
-          <th style="text-align: left; padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Status</th>
-          <th style="text-align: left; padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Assigned To</th>
-          <th style="text-align: left; padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">Created</th>
+        <tr>
+          <th>ID</th>
+          <th>Title</th>
+          <th>Category</th>
+          <th>Priority</th>
+          <th>Sentiment</th>
+          <th>Status</th>
+          <th>Assigned To</th>
+          <th>Created</th>
         </tr>
       </thead>
       <tbody>
         {% for complaint in complaints %}
-        <tr style="cursor: pointer;" onclick="window.location.href='{{ url_for('view_complaint', complaint_id=complaint.id) }}';">
-          <td style="padding: 0.75rem; border-bottom: 1px solid #f3f4f6;">#{{ complaint.id }}</td>
-          <td style="padding: 0.75rem; border-bottom: 1px solid #f3f4f6;">
-            <a href="{{ url_for('view_complaint', complaint_id=complaint.id) }}" style="color: #2563eb; text-decoration: none;">
+        <tr class="clickable-row" onclick="window.location.href='{{ url_for('view_complaint', complaint_id=complaint.id) }}';">
+          <td>#{{ complaint.id }}</td>
+          <td>
+            <a href="{{ url_for('view_complaint', complaint_id=complaint.id) }}" class="row-link">
               {{ complaint.title }}
             </a>
           </td>
-          <td style="padding: 0.75rem; border-bottom: 1px solid #f3f4f6;">{{ complaint.category }}</td>
-          <td style="padding: 0.75rem; border-bottom: 1px solid #f3f4f6;">
+          <td>{{ complaint.category }}</td>
+          <td>
             <span class="priority-badge priority-{{ complaint.priority }}">{{ complaint.priority.replace('_', ' ').title() }}</span>
           </td>
-          <td style="padding: 0.75rem; border-bottom: 1px solid #f3f4f6;">{{ complaint.sentiment.title() }}</td>
-          <td style="padding: 0.75rem; border-bottom: 1px solid #f3f4f6;">
+          <td>{{ complaint.sentiment.title() }}</td>
+          <td>
             <span class="status-badge status-{{ complaint.status }}">{{ complaint.status.replace('_', ' ').title() }}</span>
           </td>
-          <td style="padding: 0.75rem; border-bottom: 1px solid #f3f4f6;">
+          <td>
             {% if complaint.manager %}
               {{ complaint.manager.username }}
             {% else %}
               -
             {% endif %}
           </td>
-          <td style="padding: 0.75rem; border-bottom: 1px solid #f3f4f6;">{{ complaint.created_at.strftime('%d %b %Y, %I:%M %p') }}</td>
+          <td>{{ complaint.created_at.strftime('%d %b %Y, %I:%M %p') }}</td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
   {% else %}
-  <div class="info-box">
+  <div class="info-box" data-animate style="--delay: 140ms;">
     No complaints found. Submit your first complaint using the button above.
   </div>
   {% endif %}

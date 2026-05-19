@@ -251,7 +251,7 @@ def logout():
     """Logout - clear user session"""
     logout_user()
     flash('✅ Logged out successfully!', 'success')
-    return redirect(url_for('login'))
+    return redirect(url_for('index'))
 
 
 # ─── USER ROUTES (Phase 5) ───────────────────────────────────────
