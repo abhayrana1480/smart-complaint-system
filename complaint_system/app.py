@@ -165,7 +165,7 @@ def assign_manager_to_complaint():
 
 @app.route('/')
 def index():
-    """Home page - redirect to login if not authenticated, else to dashboard"""
+    """Public landing page for guests, dashboard redirect for signed-in users."""
     if current_user.is_authenticated:
         # Redirect based on role
         if current_user.role == 'admin':
@@ -174,7 +174,7 @@ def index():
             return redirect(url_for('manager_dashboard'))
         else:
             return redirect(url_for('user_dashboard'))
-    return redirect(url_for('login'))
+    return render_template('home.html')
 
 
 @app.route('/register', methods=['GET', 'POST'])

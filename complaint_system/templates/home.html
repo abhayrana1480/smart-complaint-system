@@ -1,0 +1,504 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Smart Complaint System</title>
+    <style>
+      :root {
+        --primary: #1e3a8a;
+        --primary-dark: #1e40af;
+        --accent: #0ea5e9;
+        --text: #0f172a;
+        --muted: #475569;
+        --surface: #ffffff;
+        --border: #dbe4f2;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        color: var(--text);
+        background: linear-gradient(180deg, #f0f9ff 0%, #f8fafc 45%, #eef4fb 100%);
+      }
+
+      .hero {
+        min-height: 100vh;
+        position: relative;
+        overflow: hidden;
+        display: grid;
+        place-items: center;
+        padding: 3rem 1rem 2rem;
+      }
+
+      .mesh {
+        position: absolute;
+        inset: -12% -15% auto;
+        height: 70vh;
+        background:
+          radial-gradient(circle at 20% 25%, rgba(56, 189, 248, 0.28) 0, transparent 45%),
+          radial-gradient(circle at 78% 18%, rgba(30, 58, 138, 0.24) 0, transparent 48%),
+          radial-gradient(circle at 50% 75%, rgba(14, 165, 233, 0.2) 0, transparent 42%);
+        animation: floatMesh 12s ease-in-out infinite alternate;
+        pointer-events: none;
+      }
+
+      @keyframes floatMesh {
+        from {
+          transform: translateY(0px) scale(1);
+        }
+        to {
+          transform: translateY(20px) scale(1.04);
+        }
+      }
+
+      .hero-content {
+        position: relative;
+        width: min(1150px, 100%);
+        z-index: 2;
+        display: grid;
+        gap: 2rem;
+        grid-template-columns: 1.1fr 0.9fr;
+        align-items: center;
+      }
+
+      .hero-copy {
+        max-width: 620px;
+      }
+
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        margin-bottom: 1rem;
+        border: 1px solid rgba(14, 165, 233, 0.4);
+        color: #0f3a78;
+        background: rgba(219, 234, 254, 0.66);
+        border-radius: 999px;
+        padding: 0.45rem 0.9rem;
+        font-size: 0.82rem;
+        font-weight: 700;
+      }
+
+      h1 {
+        font-size: clamp(2.1rem, 4.6vw, 3.8rem);
+        line-height: 1.08;
+        letter-spacing: -0.02em;
+      }
+
+      .sub {
+        margin-top: 1rem;
+        font-size: clamp(1rem, 1.8vw, 1.2rem);
+        color: var(--muted);
+        max-width: 52ch;
+      }
+
+      .cta-row {
+        margin-top: 1.8rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.8rem;
+      }
+
+      .btn {
+        text-decoration: none;
+        font-weight: 700;
+        border-radius: 10px;
+        padding: 0.82rem 1.35rem;
+        transition: all 0.24s ease;
+      }
+
+      .btn-primary {
+        color: #fff;
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        box-shadow: 0 10px 26px rgba(30, 58, 138, 0.26);
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 16px 34px rgba(30, 58, 138, 0.35);
+      }
+
+      .btn-ghost {
+        color: var(--primary);
+        background: #fff;
+        border: 1px solid #bfdbfe;
+      }
+
+      .btn-ghost:hover {
+        transform: translateY(-2px);
+        background: #f8fbff;
+      }
+
+      .masonry {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(120px, 1fr));
+        gap: 0.85rem;
+      }
+
+      .masonry-card {
+        border-radius: 14px;
+        padding: 1rem;
+        color: #0f172a;
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid var(--border);
+        box-shadow: 0 14px 28px rgba(15, 23, 42, 0.08);
+        backdrop-filter: blur(8px);
+      }
+
+      .masonry-card h3 {
+        font-size: 1rem;
+        margin-bottom: 0.3rem;
+      }
+
+      .masonry-card p {
+        color: #4b5563;
+        font-size: 0.88rem;
+      }
+
+      .masonry-card.tall {
+        grid-row: span 2;
+        min-height: 220px;
+      }
+
+      .section {
+        width: min(1150px, 100%);
+        margin: 0 auto;
+        padding: 1.5rem 1rem 3.5rem;
+      }
+
+      .section h2 {
+        font-size: clamp(1.6rem, 3vw, 2.2rem);
+        margin-bottom: 0.65rem;
+      }
+
+      .section-intro {
+        color: var(--muted);
+        max-width: 70ch;
+        margin-bottom: 1.5rem;
+      }
+
+      .features {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+      }
+
+      .feature-card {
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 1rem;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+      }
+
+      .feature-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+        margin-bottom: 0.75rem;
+      }
+
+      .feature-card h3 {
+        margin-bottom: 0.35rem;
+      }
+
+      .feature-card p {
+        color: #4b5563;
+        font-size: 0.92rem;
+      }
+
+      .steps {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 0.9rem;
+      }
+
+      .step {
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 1rem;
+      }
+
+      .step-num {
+        width: 30px;
+        height: 30px;
+        display: grid;
+        place-items: center;
+        border-radius: 999px;
+        color: #fff;
+        font-weight: 800;
+        background: linear-gradient(135deg, #1e40af, #0ea5e9);
+        margin-bottom: 0.6rem;
+      }
+
+      .stats-banner {
+        margin-top: 2rem;
+        background: linear-gradient(135deg, #0f172a, #1e3a8a 55%, #0ea5e9);
+        border-radius: 18px;
+        padding: 1.2rem;
+        color: #fff;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 0.9rem;
+      }
+
+      .stat-item .num {
+        font-size: 1.7rem;
+        font-weight: 800;
+      }
+
+      .stat-item .label {
+        opacity: 0.9;
+        font-size: 0.9rem;
+      }
+
+      footer {
+        margin-top: 2rem;
+        border-top: 1px solid #dbe4f2;
+        background: #f8fbff;
+      }
+
+      .footer-inner {
+        width: min(1150px, 100%);
+        margin: 0 auto;
+        padding: 1.2rem 1rem 1.8rem;
+        display: flex;
+        gap: 0.8rem;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        color: #475569;
+        font-size: 0.92rem;
+      }
+
+      .footer-links {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .footer-links a {
+        color: #334155;
+        text-decoration: none;
+        transition: color 0.2s ease;
+      }
+
+      .footer-links a:hover {
+        color: #1e40af;
+      }
+
+      .entrance {
+        opacity: 0;
+        transform: translateY(24px);
+        animation: revealUp 0.7s ease forwards;
+      }
+
+      .delay-1 {
+        animation-delay: 0.12s;
+      }
+
+      .delay-2 {
+        animation-delay: 0.24s;
+      }
+
+      .delay-3 {
+        animation-delay: 0.36s;
+      }
+
+      @keyframes revealUp {
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .reveal {
+        opacity: 0;
+        transform: translateY(24px);
+        transition: opacity 0.6s ease, transform 0.6s ease;
+      }
+
+      .reveal.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      @media (max-width: 920px) {
+        .hero-content {
+          grid-template-columns: 1fr;
+        }
+
+        .masonry {
+          grid-template-columns: repeat(2, minmax(140px, 1fr));
+        }
+      }
+
+      @media (max-width: 560px) {
+        .masonry {
+          grid-template-columns: 1fr;
+        }
+
+        .masonry-card.tall {
+          min-height: auto;
+          grid-row: span 1;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="hero">
+        <div class="mesh" aria-hidden="true"></div>
+        <div class="hero-content">
+          <div class="hero-copy">
+            <span class="tag entrance">✨ Smart Complaint Experience</span>
+            <h1 class="entrance delay-1">
+              Resolve complaints faster with intelligent routing and clear visibility.
+            </h1>
+            <p class="sub entrance delay-2">
+              Smart Complaint System helps students and teams submit, track, and resolve issues with AI-assisted categorization, priority scoring, and role-based collaboration.
+            </p>
+            <div class="cta-row entrance delay-3">
+              <a class="btn btn-primary" href="{{ url_for('register') }}">Get Started</a>
+              <a class="btn btn-ghost" href="{{ url_for('login') }}">Sign In</a>
+            </div>
+          </div>
+          <div class="masonry entrance delay-2" aria-label="Feature preview cards">
+            <article class="masonry-card tall">
+              <h3>🎯 AI Complaint Triage</h3>
+              <p>Auto-categorize each complaint and prioritize cases with urgency signals.</p>
+            </article>
+            <article class="masonry-card">
+              <h3>⚡ Live Queue</h3>
+              <p>Managers see actionable work instantly.</p>
+            </article>
+            <article class="masonry-card">
+              <h3>🔐 Role-Aware Access</h3>
+              <p>Users, managers, and admins each get focused experiences.</p>
+            </article>
+            <article class="masonry-card">
+              <h3>📊 Oversight</h3>
+              <p>Control center insights for operations and accountability.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2 class="reveal">What We Do</h2>
+        <p class="section-intro reveal">
+          We provide an end-to-end complaint lifecycle platform—from intake to closure—designed for speed, transparency, and better service outcomes.
+        </p>
+
+        <div class="features">
+          <article class="feature-card reveal">
+            <div class="feature-icon" aria-hidden="true">📝</div>
+            <h3>Simple Submission</h3>
+            <p>Users submit clear complaint details in a guided, low-friction form.</p>
+          </article>
+          <article class="feature-card reveal">
+            <div class="feature-icon" aria-hidden="true">🤖</div>
+            <h3>AI Suggestions</h3>
+            <p>Get auto-generated category and response guidance for quicker handling.</p>
+          </article>
+          <article class="feature-card reveal">
+            <div class="feature-icon" aria-hidden="true">📬</div>
+            <h3>Smart Assignment</h3>
+            <p>Cases are routed to available managers with balanced workload logic.</p>
+          </article>
+          <article class="feature-card reveal">
+            <div class="feature-icon" aria-hidden="true">💬</div>
+            <h3>Transparent Updates</h3>
+            <p>Track responses, status progress, and resolution details in one thread.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2 class="reveal">How It Works</h2>
+        <div class="steps">
+          <article class="step reveal">
+            <div class="step-num">1</div>
+            <h3>Sign up</h3>
+            <p>Create your account and access your personalized dashboard.</p>
+          </article>
+          <article class="step reveal">
+            <div class="step-num">2</div>
+            <h3>Submit complaint</h3>
+            <p>Describe the issue and let AI assist with early triage.</p>
+          </article>
+          <article class="step reveal">
+            <div class="step-num">3</div>
+            <h3>Manager response</h3>
+            <p>Assigned manager investigates, responds, and updates status.</p>
+          </article>
+          <article class="step reveal">
+            <div class="step-num">4</div>
+            <h3>Resolve & track</h3>
+            <p>Receive resolution updates and rate the final outcome.</p>
+          </article>
+        </div>
+
+        <div class="stats-banner reveal">
+          <div class="stat-item">
+            <div class="num">1k+</div>
+            <div class="label">Tickets handled</div>
+          </div>
+          <div class="stat-item">
+            <div class="num">92%</div>
+            <div class="label">Resolved within SLA</div>
+          </div>
+          <div class="stat-item">
+            <div class="num">24/7</div>
+            <div class="label">Status visibility</div>
+          </div>
+          <div class="stat-item">
+            <div class="num">4.8/5</div>
+            <div class="label">User satisfaction</div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="footer-inner">
+        <p>© 2026 Smart Complaint System. All rights reserved.</p>
+        <div class="footer-links">
+          <a href="{{ url_for('index') }}">Home</a>
+          <a href="{{ url_for('login') }}">Login</a>
+          <a href="{{ url_for('register') }}">Register</a>
+          <a href="#" aria-label="LinkedIn">LinkedIn</a>
+          <a href="#" aria-label="X">X</a>
+          <a href="#" aria-label="GitHub">GitHub</a>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      // IntersectionObserver drives scroll-triggered reveals for cards/sections.
+      const revealObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("visible");
+              revealObserver.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.18 }
+      );
+
+      document.querySelectorAll(".reveal").forEach((item) => revealObserver.observe(item));
+    </script>
+  </body>
+</html>
